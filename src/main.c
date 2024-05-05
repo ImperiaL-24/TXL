@@ -7,9 +7,13 @@
 #include "impl/int_impl.h"
 #include "map/omap.h"
 
+#include "err.h"
+
 int main() {
+    
     list_t list = LIST_NEW(sizeof(int));
     int data = 5;
+    // scanf("%d", &data);
     sll_addh(&list, &data);
     data = 7;
     sll_addh(&list, &data);
@@ -18,56 +22,153 @@ int main() {
     data = 9;
     sll_add_index(&list, 100 ,&data);
 
+    DIE(*(int*)sll_get(&list, 0) != 13, "TEST 1 FAIL");
+    DIE(*(int*)sll_get(&list, 1) != 7, "TEST 1 FAIL");
+    DIE(*(int*)sll_get(&list, 2) != 5, "TEST 1 FAIL");
+    DIE(*(int*)sll_get(&list, 3) != 9, "TEST 1 FAIL");
+
+
     sll_remh(&list);
     sll_rem_index(&list, 0);
+
+    DIE(*(int*)sll_get(&list, 0) != 5, "TEST 2 FAIL");
+    DIE(*(int*)sll_get(&list, 1) != 9, "TEST 2 FAIL");
+
     data = 11;
     sll_addt(&list, &data);
-    for_iter(list_t, i, &list) {
-        printf("%d ", SLITER_VAL(i, int));
-    }
-    str_t str = str_from("test");
+    data = 25;
+    sll_add_after(&list, list.head, &data);
+
+    DIE(*(int*)sll_get(&list, 0) != 5, "TEST 3 FAIL");
+    DIE(*(int*)sll_get(&list, 1) != 25, "TEST 3 FAIL");
+    DIE(*(int*)sll_get(&list, 2) != 9, "TEST 3 FAIL");
+    DIE(*(int*)sll_get(&list, 3) != 11, "TEST 3 FAIL");
+
+    sll_rem_after(&list, list.head->next);
+
+    DIE(*(int*)sll_get(&list, 0) != 5, "TEST 3.1 FAIL");
+    DIE(*(int*)sll_get(&list, 1) != 25, "TEST 3.1 FAIL");
+    DIE(*(int*)sll_get(&list, 2) != 11, "TEST 3.1 FAIL");
     
-    printf("%s ", str.data);
-    str_eq(str, str);
+
+    str_t str = str_from("test");
+    str_t str2 = str_from("test2");
+    DIE(str_eq(str, str2) != 0, "TEST 4 FAIL");
+    DIE(str_eq(str, str) != 1, "TEST 4 FAIL");
+    
 
     hmap_t hmap = HMAP_NEW(uint32_t, uint32_t);
     uint32_t key = 5;
     uint32_t value = 11;
     hm_set(&hmap, &key, &value);
-    printf("%d ", *(int*)hm_get(&hmap, &key));
-    value = 18;
+    DIE(*(int*)hm_get(&hmap, &key) != 11, "TEST 5 FAIL");
+    DIE(hmap.length != 1, "TEST 5 FAIL");
 
+    value = 18;
     hm_set(&hmap, &key, &value);
-    printf("%d ", *(int*)hm_get(&hmap, &key));
+    DIE(*(int*)hm_get(&hmap, &key) != 18, "TEST 5 FAIL");
+    DIE(hmap.length != 1, "TEST 5 FAIL");
+
     key = 444;
+    value = 21;
     hm_set(&hmap, &key, &value);
-    printf("%d ", *(int*)hm_get(&hmap, &key));
-    printf("%ld ", hmap.length);
-    printf("%ld ", hm_has(&hmap, &key));
+    DIE(*(int*)hm_get(&hmap, &key) != 21, "TEST 5 FAIL");
+    DIE(hmap.length != 2, "TEST 5 FAIL");
+
+    DIE(!hm_has(&hmap, &key), "TEST 6 FAIL");
     key = 5;
-    printf("%ld ", hm_has(&hmap, &key));
+    DIE(!hm_has(&hmap, &key), "TEST 6 FAIL");
     key = 7;
-    printf("%ld ", hm_has(&hmap, &key));
+    DIE(hm_has(&hmap, &key), "TEST 6 FAIL");
+
+    key = 444;
+    hm_remove(&hmap, &key);
+    DIE(hm_has(&hmap, &key), "TEST 6 R FAIL");
 
     omap_t omap = OMAP_NEW(uint32_t, uint32_t);
     key = 5;
     value = 11;
     om_set(&omap, &key, &value);
-    printf("%d\n", *(int*)om_get(&omap, &key));
+    DIE(*(int*)om_get(&omap, &key) != 11, "TEST 7 1 FAIL");
+    DIE(omap.access.length != 1, "TEST 7 FAIL");
+
     value = 18;
-
     om_set(&omap, &key, &value);
-    printf("%d ", *(int*)om_get(&omap, &key));
+    DIE(*(int*)om_get(&omap, &key) != 18, "TEST 7 2 FAIL");
+    DIE(omap.access.length != 1, "TEST 7 3 FAIL");
+
     key = 444;
+    value = 21;
     om_set(&omap, &key, &value);
-    printf("%d ", *(int*)om_get(&omap, &key));
-    printf("%ld ", omap.data.size);
-    printf("%ld ", om_has(&omap, &key));
-    key = 5;
-    printf("%ld ", om_has(&omap, &key));
-    key = 7;
-    printf("%ld ", om_has(&omap, &key));
+    DIE(*(int*)om_get(&omap, &key) != 21, "TEST 7 4 FAIL");
+    DIE(omap.access.length != 2, "TEST 7 5 FAIL");
 
+    DIE(!om_has(&omap, &key), "TEST 8 FAIL");
+    key = 5;
+    DIE(!om_has(&omap, &key), "TEST 8 FAIL");
+    key = 7;
+    DIE(om_has(&omap, &key), "TEST 8 FAIL");
     printf("\n");
 
+    key = 1;
+    value = 121;
+    om_set(&omap, &key, &value);
+    for_iter(omap_t, i, &omap) {
+        printf("%d ", OMITER_VAL(i, uint32_t));
+    }
+    printf("\n");
+    sll_free(&list);
+    hm_free(&hmap);
+    om_free(&omap);
+
+
+    omap = OMAP_NEW(str_t, str_t);
+    str_t key_s = str_from("test1");
+    str_t key_s1 = str_from("key1");
+
+
+    om_set(&omap, &key_s, &str);
+    om_set(&omap, &key_s, &str2);
+    om_set(&omap, &key_s1, &str2);
+
+
+    DIE(!str_eq(*(str_t*)om_get(&omap, &key_s), str2), "TEST 9 FAIL");
+    DIE(!str_eq(*(str_t*)om_get(&omap, &key_s1), str2), "TEST 9 FAIL");
+
+
+    om_remove(&omap, &key_s1);
+    DIE(om_has(&omap, &key_s1), "TEST 9 FAIL");
+    DIE(omap.access.length != 1, "TEST 9 FAIL");
+
+    printf("%s\n", ((str_t*)om_get(&omap, &key_s))->data);
+    om_free(&omap);
+    str_free(&key_s);
+    str_free(&key_s1);
+    str_free(&str);
+    str_free(&str2);
+
+
+    omap = OMAP_NEW(uint32_t, uint32_t);
+    for(int i=0;i<10;i++) {
+        om_conset(&omap, &i, &i);
+        printf("NR: %d, HASH: %u\n", i, omap.access.hash_key(&i));
+    }
+    for_iter(omap_t, i, &omap) {
+        printf("VALUE: %d\n", OMITER_VAL(i, uint32_t));
+    }
+    om_remove_first(&omap);
+    for_iter(omap_t, i, &omap) {
+        printf("VALUE: %d\n", OMITER_VAL(i, uint32_t));
+    }
+    om_remove_first(&omap);
+    for_iter(omap_t, i, &omap) {
+        printf("VALUE: %d\n", OMITER_VAL(i, uint32_t));
+    }
+    om_remove_first(&omap);
+    for_iter(omap_t, i, &omap) {
+        printf("VALUE: %d\n", OMITER_VAL(i, uint32_t));
+    }
+    om_free(&omap);
+
+    //TODO: tests for int key and struct value;
 }

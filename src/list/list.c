@@ -171,9 +171,18 @@ inline void sll_remh(list_t *list)
 
 void sll_rem_after(list_t *list, lnode_t* prev)
 {
+	if(!prev) {
+		lnode_t* node = list->head;
+		__lnode_safe_remove(list, NULL);
+		__lnode_free(node);
+		return;
+	}
+
 	if (!list->size)
 		return;
 	lnode_t* node = prev->next;
+	if(!node)
+		return;
 	__lnode_safe_remove(list, prev);
 	__lnode_free(node);
 }
@@ -183,7 +192,9 @@ void sll_rem_index(list_t *list, size_t index)
 	if (!list->size)
 		return;
 	if(!index) {
+		lnode_t* node = list->head;
 		__lnode_safe_remove(list, NULL);
+		__lnode_free(node);
 		return;
 	}
 	size_t jmp_idx = index >= list->size ? list->size - 2 : index - 1;

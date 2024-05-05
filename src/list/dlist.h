@@ -29,6 +29,14 @@ typedef struct {
 } dlist_t;
 
 /**
+ * \brief Frees a node and the data inside.
+ *
+ * \param[in] node The node to free
+ *
+ */
+void dlnode_free(dlnode_t *node);
+
+/**
  * \brief Add `data` to the start of the `list`.
  *
  * \param[in] list The list to add to

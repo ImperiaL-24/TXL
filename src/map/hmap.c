@@ -2,6 +2,25 @@
 #include "../err.h"
 #include "../impl/iter.h"
 
+kv_pair_t kv_pair_new(void* key, void* value, void (*clone_key)(void*, void*), void (*clone_data)(void*, void*), size_t key_size, size_t data_size)
+{
+    void* new_data = malloc(data_size);
+    clone_data(new_data, value);
+    void* new_key = malloc(key_size);
+    clone_key(new_key, key);
+    return (kv_pair_t) {.key = new_key, .value = new_data};
+}
+
+void kv_pair_free(kv_pair_t pair, void (*free_key)(void*), void (*free_value)(void*))
+{
+    if(free_key)
+        free_key(pair.key);
+    if(free_value)
+        free_value(pair.value);
+    free(pair.key);
+    free(pair.value);
+}
+
 int __hm_resize(hmap_t* hmap, size_t new_size) {
     /* If we need to grow */
 	if (new_size > hmap->capacity) {
@@ -27,7 +46,7 @@ int __hm_resize(hmap_t* hmap, size_t new_size) {
 }
 
 
-hmap_t hm_new(hash_t (*hash_function)(void*),cmp_t (*cmp_function)(void*, void*),void (*free_key)(void*),void (*free_data)(void*), size_t key_size, size_t data_size) {
+hmap_t hm_new(hash_t (*hash_function)(void*), cmp_t (*cmp_function)(void*, void*), void (*free_key)(void*),void (*free_data)(void*), void (*clone_key)(void*,void*), void (*clone_data)(void*,void*), size_t key_size, size_t data_size) {
     #define INITIAL_CAPACITY 10
     hmap_t hmap;
     hmap.capacity = INITIAL_CAPACITY;
@@ -36,6 +55,9 @@ hmap_t hm_new(hash_t (*hash_function)(void*),cmp_t (*cmp_function)(void*, void*)
     hmap.cmp_key = cmp_function;
     hmap.free_key = free_key;
     hmap.free_data = free_data;
+
+    hmap.clone_key = clone_key;
+    hmap.clone_data = clone_data;
 
     hmap.length = 0;
     hmap.key_size = key_size;
@@ -53,32 +75,19 @@ hmap_t hm_new(hash_t (*hash_function)(void*),cmp_t (*cmp_function)(void*, void*)
 void hm_set(hmap_t* hmap, void* key, void* value) {
     hash_t hash = hmap->hash_key(key);
     size_t idx = hash % hmap->capacity;
-    // printf("ADDING TO IDX: %d\n", idx);
-    list_t* list = hmap->lists + idx;
-    for_iter(list_t, i, list) {
+    kv_pair_t pair = kv_pair_new(key, value, hmap->clone_key, hmap->clone_data, hmap->key_size, hmap->data_size);
+    for_iter(list_t, i, hmap->lists + idx) {
         if(hmap->cmp_key(SLITER_VAL(i, kv_pair_t).key, key) == 0) {
-            if(hmap->free_data)
-                hmap->free_data(SLITER_VAL(i, kv_pair_t).value);
-            void* new_data = malloc(hmap->data_size);
-            memcpy(new_data, value, hmap->data_size);
-            SLITER_VAL(i, kv_pair_t).value = new_data;
-
+            kv_pair_free(SLITER_VAL(i, kv_pair_t), hmap->free_key, hmap->free_data);
+            memcpy(&SLITER_VAL(i, kv_pair_t), &pair, sizeof(kv_pair_t));
             return;
         }
     }
     hmap->length++;
     if(__hm_resize(hmap, hmap->length)) {
-        // TODO: rehash to get the new list
+        idx = hash % hmap->capacity;
     }
-
-    void* new_data = malloc(hmap->data_size);
-    memcpy(new_data, value, hmap->data_size);
-    void* new_key = malloc(hmap->key_size);
-    memcpy(new_key, key, hmap->key_size);
-    kv_pair_t pair = (kv_pair_t) {.key = new_key, .value = new_data};
-    sll_addh(list, &pair);
-    // printf("DEBUG -> ADDED TO LIST\n");
-     
+    sll_addh(hmap->lists + idx, &pair);
 }
 
 void hm_remove(hmap_t* hmap, void* key) {
@@ -87,7 +96,8 @@ void hm_remove(hmap_t* hmap, void* key) {
     lnode_t* prev = NULL;
     for_iter(list_t, i, hmap->lists + idx) {
         if(hmap->cmp_key(SLITER_VAL(i, kv_pair_t).key, key) == 0) {
-            lnode_t* prev_ref = prev ? prev : hmap->lists[idx].head;
+            lnode_t* prev_ref = prev ? prev : NULL;
+            kv_pair_free(SLITER_VAL(i, kv_pair_t), hmap->free_key, hmap->free_data);
             sll_rem_after(hmap->lists + idx, prev_ref);
             hmap->length--;
             __hm_resize(hmap, hmap->length);
@@ -118,4 +128,15 @@ size_t hm_has(hmap_t* hmap, void* key) {
         }
     }
     return 0;
+}
+
+void hm_free(hmap_t* hmap) {
+    
+    for(size_t idx = 0; idx < hmap->capacity; idx++) {
+        for_iter(list_t, i, hmap->lists + idx) {
+            kv_pair_free(SLITER_VAL(i, kv_pair_t), hmap->free_key, hmap->free_data);
+        }
+        sll_free(hmap->lists + idx);
+    }
+    free(hmap->lists);
 }

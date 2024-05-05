@@ -11,9 +11,21 @@
 typedef struct {
     hmap_t access;
     dlist_t data;
+    void (*free_data)(void*);
+    void (*clone_data)(void*,void*);
+    size_t data_size;
 } omap_t;
 
-omap_t om_new(hash_t (*hash_function)(void*),cmp_t (*cmp_function)(void*, void*),void (*free_key)(void*),void (*free_data)(void*), size_t key_size, size_t data_size);
+// typedef struct {
+//     hash_t hash;
+//     void* value;
+// } hv_pair_t;
+
+// hv_pair_t hv_pair_new(hash_t hash, void* value, size_t value_size);
+
+// void hv_pair_free(hv_pair_t pair, void (*free_value)(void*));
+
+omap_t om_new(hash_t (*hash_function)(void*), cmp_t (*cmp_function)(void*, void*), void (*free_key)(void*),void (*free_data)(void*), void (*clone_key)(void*,void*), void (*clone_data)(void*,void*), size_t key_size, size_t data_size);
 
 void om_set(omap_t* omap, void* key, void* value);
 
@@ -27,7 +39,7 @@ void *om_get(omap_t* omap, void* key);
 
 size_t om_has(omap_t* omap, void* key);
 
-#define OMAP_NEW(key_type, value_type) om_new(key_type##_hash, key_type##_cmp, key_type##_free, value_type##_free, sizeof(key_type), sizeof(value_type));
+#define OMAP_NEW(key_type, value_type) om_new(key_type##_hash, key_type##_cmp, key_type##_free, value_type##_free, key_type##_clone, value_type##_clone, sizeof(key_type), sizeof(value_type));
 
 /**
  * \brief Creates an iterator from an Ordered HashMap.
@@ -64,3 +76,7 @@ void omap_t_iter_next(iter_t *iter);
  *
  */
 void omap_t_iter_prev(iter_t *iter);
+
+void om_free(omap_t* omap);
+
+#define OMITER_VAL(iter, type) (*(type*)DLITER_VAL(iter, kv_pair_t).value)

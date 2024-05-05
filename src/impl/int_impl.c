@@ -18,3 +18,7 @@ cmp_t uint32_t_cmp(void *num1, void* num2) {
     if(val1 == val2) return EQUAL;
     return BIGGER;
 }
+
+inline void uint32_t_clone(void* target, void* origin) {
+    *(uint32_t*)target = *(uint32_t*)origin;
+}

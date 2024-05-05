@@ -63,14 +63,8 @@ static inline void __dlnode_safe_remove(dlist_t *list, dlnode_t *node)
 	list->size--;
 }
 
-/**
- * \brief Frees a node and the data inside.
- *
- * \param[in] node The node to free
- *
- * \note This is for internal use only.
- */
-static inline void __dlnode_free(dlnode_t *node)
+
+inline void dlnode_free(dlnode_t *node)
 {
 	free(node->data);
 	free(node);
@@ -207,7 +201,7 @@ void dll_rem_node(dlist_t *list, dlnode_t *node)
 	if (!list->size)
 		return;
 	__dlnode_safe_remove(list, node);
-	__dlnode_free(node);
+	dlnode_free(node);
 }
 
 void dll_rem_index(dlist_t *list, size_t index)
@@ -216,7 +210,7 @@ void dll_rem_index(dlist_t *list, size_t index)
 		return;
 	dlnode_t *node = dll_jump(list, index);
 	__dlnode_safe_remove(list, node);
-	__dlnode_free(node);
+	dlnode_free(node);
 }
 
 inline void *dll_get(dlist_t *list, size_t index)
@@ -232,7 +226,7 @@ void dll_free(dlist_t *list)
 	{
 		if (&ITER_VAL(i, dlnode_t) == list->head)
 			continue;
-		__dlnode_free(ITER_VAL(i, dlnode_t).prev);
+		dlnode_free(ITER_VAL(i, dlnode_t).prev);
 	}
-	__dlnode_free(list->tail);
+	dlnode_free(list->tail);
 }

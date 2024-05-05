@@ -16,6 +16,8 @@ typedef  struct {
     size_t length;
 } str_t;
 
+str_t str_ref_from(char* cstring);
+
 str_t str_from(char* cstring);
 
 str_t str_clone(str_t str);
@@ -26,6 +28,10 @@ cmp_t str_t_cmp(void* str1, void* str2);
 
 uint8_t str_eq(str_t str1, str_t str2);
 
-void str_t_free(str_t str);
+void str_t_clone(void* target, void* str);
+
+void str_free(void* str);
+
+#define str_t_free str_free
 
 #endif  //!__STR__H__
