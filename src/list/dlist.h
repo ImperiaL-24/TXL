@@ -20,6 +20,8 @@ typedef struct dlnode_t {
 
 /**
  * \brief A generic doubly linked list. `dlist_t` is an Iterable object.
+ * This list implementation does not own its data, meaning it will have to freed.
+ * The data is just shallow copied into the list.
  */
 typedef struct {
 	dlnode_t *head;

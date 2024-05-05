@@ -1,17 +1,5 @@
 #include "omap.h"
 
-// hv_pair_t hv_pair_new(hash_t hash, void* value, size_t value_size) {
-//     void* new_value = malloc(value_size);
-//     memcpy(new_value, value, value_size);
-//     return (hv_pair_t) {.hash = hash, .value = new_value};
-// }
-
-// void hv_pair_free(hv_pair_t pair, void (*free_value)(void*)) {
-//     if(free_value)
-//         free_value(pair.value);
-//     free(pair.value);
-// }
-
 static inline void __om_replace(omap_t* omap, dlnode_t**node_ref, kv_pair_t pair, void* key) {
     kv_pair_t* value_loc = (kv_pair_t*)(*node_ref)->data;
     kv_pair_free(*value_loc,omap->access.free_key, omap->free_data);
@@ -120,7 +108,5 @@ void om_free(omap_t* omap) {
     for_iter(dlist_t, i, &omap->data) {
         kv_pair_free(DLITER_VAL(i, kv_pair_t), omap->access.free_key, omap->free_data);
     }
-
     dll_free(&omap->data);
-
 }

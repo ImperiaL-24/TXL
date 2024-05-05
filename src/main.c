@@ -9,6 +9,15 @@
 
 #include "err.h"
 
+#include "impl/clone.h"
+
+typedef struct {
+    char code;
+    int val;
+} test_t;
+
+impl_default_clone(test_t);
+
 int main() {
     
     list_t list = LIST_NEW(sizeof(int));
@@ -169,6 +178,22 @@ int main() {
         printf("VALUE: %d\n", OMITER_VAL(i, uint32_t));
     }
     om_free(&omap);
+    #define test_t_free NULL
+    omap = OMAP_NEW(uint32_t, test_t);
 
+    test_t val = (test_t){.code = 'a', .val = 5};
+    key = 5;
+    om_set(&omap, &key, &val);
+    DIE(((test_t*)om_get(&omap, &key))->code != 'a', "TEST 10 FAIL");
+    DIE(((test_t*)om_get(&omap, &key))->val != 5, "TEST 10 FAIL");
+    key = 6;
+    om_set(&omap, &key, &val);
+    DIE(((test_t*)om_get(&omap, &key))->code != 'a', "TEST 10 FAIL");
+    DIE(((test_t*)om_get(&omap, &key))->val != 5, "TEST 10 FAIL");
+    om_remove_first(&omap);
+    om_remove_first(&omap);
+    DIE(omap.data.size, "TEST 10 FAIL");
+
+    om_free(&omap);
     //TODO: tests for int key and struct value;
 }

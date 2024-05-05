@@ -11,6 +11,10 @@
 #include "../impl/cmp.h"
 #include "../list/list.h"
 
+/**
+ * \brief An Unordered HashMap.
+ * The hashmap owns it's data, making a deep copy of the data and its keys.
+ */
 typedef struct {
     hash_t (*hash_key)(void*);
     cmp_t (*cmp_key)(void*, void*);
@@ -28,6 +32,9 @@ typedef struct {
     list_t* lists;
 } hmap_t;
 
+/**
+ * \brief A key-value pair.
+ */
 typedef struct {
     void* key;
     void* value;

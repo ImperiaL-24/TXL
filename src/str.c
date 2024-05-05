@@ -29,8 +29,7 @@ hash_t str_t_hash(void *key)
 void str_t_clone(void* target, void* str) {
     str_t* new_str = (str_t*)target;
     str_t* origin_str = (str_t*)str;
-    str_t created_str = str_from(origin_str->data);
-    *new_str = created_str;
+    *new_str = str_from(origin_str->data);
 }
 
 inline cmp_t str_t_cmp(void* str1, void* str2) {

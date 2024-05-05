@@ -222,6 +222,8 @@ inline void *dll_get(dlist_t *list, size_t index)
 
 void dll_free(dlist_t *list)
 {
+	if(!list->size)
+		return;
 	for_iter(dlist_t, i, list)
 	{
 		if (&ITER_VAL(i, dlnode_t) == list->head)

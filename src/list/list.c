@@ -13,15 +13,13 @@
  * \param[in] node The node to add
  *
  * \note This is for internal use only. `prev` is an address of node
- * references, like `&slnode_t.next` and `&list_t.head`.
+ * references, like `&lnode_t.next` and `&list_t.head`.
  */
 static inline void __lnode_insert(lnode_t **prev,
 								   lnode_t *node)
 {
 	node->next = *prev;
-	// node->prev = *next;
 	*prev = node;
-	// *next = node;
 }
 
 /**

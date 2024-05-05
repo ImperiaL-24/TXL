@@ -16,15 +16,6 @@ typedef struct {
     size_t data_size;
 } omap_t;
 
-// typedef struct {
-//     hash_t hash;
-//     void* value;
-// } hv_pair_t;
-
-// hv_pair_t hv_pair_new(hash_t hash, void* value, size_t value_size);
-
-// void hv_pair_free(hv_pair_t pair, void (*free_value)(void*));
-
 omap_t om_new(hash_t (*hash_function)(void*), cmp_t (*cmp_function)(void*, void*), void (*free_key)(void*),void (*free_data)(void*), void (*clone_key)(void*,void*), void (*clone_data)(void*,void*), size_t key_size, size_t data_size);
 
 void om_set(omap_t* omap, void* key, void* value);
@@ -80,3 +71,5 @@ void omap_t_iter_prev(iter_t *iter);
 void om_free(omap_t* omap);
 
 #define OMITER_VAL(iter, type) (*(type*)DLITER_VAL(iter, kv_pair_t).value)
+
+#define OMITER_KEY(iter, type) (*(type*)DLITER_VAL(iter, kv_pair_t).key)

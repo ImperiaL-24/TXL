@@ -18,7 +18,9 @@ typedef struct lnode_t {
 } lnode_t;
 
 /**
- * \brief A generic doubly linked list. `list_t` is a One Way Iterable object.
+ * \brief A generic singly linked list. `list_t` is a One Way Iterable object.
+ * This list implementation does not own its data, meaning it will have to freed.
+ * The data is just shallow copied into the list.
  */
 typedef struct {
 	lnode_t *head;
@@ -72,6 +74,14 @@ void sll_add_index(list_t *list, size_t index, void *data);
  */
 void sll_remh(list_t *list);
 
+/**
+ * \brief Removes the element after node `prev`.
+ *
+ * \param[in] list The list to remove the element from
+ * \param[in] prev The previous element
+ * 
+ * \note If `prev` is `NULL` then it will remove the head of the list.
+ */
 void sll_rem_after(list_t *list, lnode_t* prev);
 
 /**
@@ -131,7 +141,7 @@ void sll_free(list_t *list);
 #define LIST_GET(list, type, index) (*(type *)sll_get(list, index))
 
 /**
- * \brief Creates an iterator from a Doubly Linked List.
+ * \brief Creates an iterator from a Singly Linked List.
  *
  * \param[in] list The list to iterate
  *
@@ -141,7 +151,7 @@ iter_t list_t_iter_new(list_t *list);
 
 /**
  * \brief Moves the iterator `iter` to the next value, if it iterates over a
- * Doubly Linked List.
+ * Singly Linked List.
  *
  * \param[in] iter The iterator to move
  *
