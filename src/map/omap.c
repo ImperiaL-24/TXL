@@ -1,112 +1,106 @@
+/**
+ * Copyright (c) 2024
+ * \file omap.c
+ * \author Dobrescu Andrei-Traian - 315CA (andrei.dobrescu2402@stud.acs.upb.ro)
+ * \date 2024-05-02
+ * \brief Ordered HashMap
+ */
 #include "omap.h"
+#include "../impl/ref.h"
 
-static inline void __om_replace(omap_t* omap, dlnode_t**node_ref, kv_pair_t pair, void* key) {
-    kv_pair_t* value_loc = (kv_pair_t*)(*node_ref)->data;
-    kv_pair_free(*value_loc,omap->access.free_key, omap->free_data);
-    memmove(value_loc, &pair, sizeof(kv_pair_t));
-    dlnode_t* node = *node_ref;
-    hm_remove(&omap->access, key);
-
-    hm_set(&omap->access, key, &node);
+omap_t om_new(prototype_t *key_proto, prototype_t *value_proto)
+{
+	omap_t map;
+	map.access = hm_new(key_proto, PROTOTYPE(ref_t));
+	map.data = DLIST_NEW(kv_pair_t);
+	map.value_proto = value_proto;
+	return map;
 }
 
-void __node_clone(void* area, void* origin) {
-    *(dlnode_t**)area = *(dlnode_t**)origin;
+void om_set(omap_t *omap, void *key, void *value)
+{
+	dlnode_t **node_ref = hm_get(&omap->access, key);
+	kv_pair_t pair =
+		kv_pair_new(key, value, omap->access.key_proto, omap->value_proto);
+	if (!node_ref) {
+		dll_addt(&omap->data, &pair);
+		hm_set(&omap->access, key, &omap->data.tail);
+		return;
+	}
+	kv_pair_t *value_loc = (kv_pair_t *)(*node_ref)->data;
+	kv_pair_deep_free(*value_loc, omap->access.key_proto, omap->value_proto);
+	omap->data.data_proto->clone(value_loc, &pair);
+	// memmove(value_loc, &pair, sizeof(kv_pair_t));
+	dlnode_t *node = *node_ref;
+	hm_remove(&omap->access, key);
 
+	hm_set(&omap->access, key, &node);
 }
 
-omap_t om_new(hash_t (*hash_function)(void*), cmp_t (*cmp_function)(void*, void*), void (*free_key)(void*),void (*free_data)(void*), void (*clone_key)(void*,void*), void (*clone_data)(void*,void*), size_t key_size, size_t data_size) {
-    omap_t map;
-    map.access = hm_new(hash_function, cmp_function, free_key, NULL, clone_key, __node_clone, key_size, sizeof(dlnode_t*));
-    map.data = DLIST_NEW(sizeof(kv_pair_t));
-    map.free_data = free_data;
-    map.data_size = data_size;
-    map.clone_data = clone_data;
-    return map; 
+void om_remove(omap_t *omap, void *key)
+{
+	dlnode_t **node = hm_get(&omap->access, key);
+	if (!node)
+		return;
+
+	kv_pair_t *value_loc = (kv_pair_t *)(*node)->data;
+	kv_pair_data_free(*value_loc, omap->access.key_proto, omap->value_proto);
+
+	dll_rem_node(&omap->data, *node);
+	hm_remove(&omap->access, key);
 }
 
-void om_set(omap_t* omap, void* key, void* value) {
-    dlnode_t** node_ref = hm_get(&omap->access, key);
-    kv_pair_t pair = kv_pair_new(key, value, omap->access.clone_key, omap->clone_data, omap->access.key_size, omap->data_size);
-    if(!node_ref) {
-        
-        dll_addt(&omap->data, &pair);
-        hm_set(&omap->access, key, &omap->data.tail);
-        return;
-    }
-    __om_replace(omap, node_ref, pair, key);
-    
+void om_remove_first(omap_t *omap)
+{
+	if (!omap->data.size)
+		return;
+	kv_pair_t pair = *(kv_pair_t *)omap->data.head->data;
+	hm_remove(&omap->access, pair.key);
+	dll_remh(&omap->data);
+
+	kv_pair_data_free(pair, omap->access.key_proto, omap->value_proto);
 }
 
-void om_conset(omap_t* omap, void* key, void* value) {
-    if(!omap->data.size) {
-        om_set(omap, key, value);
-    }
-    kv_pair_t pair = kv_pair_new(key, value, omap->access.clone_key, omap->clone_data, omap->access.key_size, omap->data_size);
-    dlnode_t** node_ref = hm_get(&omap->access, key);
-    if(!node_ref) {
-        hash_t hash = omap->access.hash_key(key);
-        for_iter_rev(dlist_t, i, &omap->data) {
-            hash_t data_hash = omap->access.hash_key(DLITER_VAL(i, kv_pair_t).key);
-            if(data_hash > hash) continue;
-            dll_add_after(&omap->data, &ITER_VAL(i, dlnode_t), &pair);
-            hm_set(&omap->access, key, &ITER_VAL(i, dlnode_t).next);
-            return;
-        }
-        return;
-    }
-    __om_replace(omap, node_ref, pair, key);
+inline void *om_get(omap_t *omap, void *key)
+{
+	dlnode_t **node_ref = hm_get(&omap->access, key);
+
+	return node_ref ? ((kv_pair_t *)(*node_ref)->data)->value : NULL;
 }
 
-void om_remove(omap_t* omap, void* key) {
-    dlnode_t** node = hm_get(&omap->access,key);
-    if(!node) return;
-
-    kv_pair_t* value_loc = (kv_pair_t*)(*node)->data;
-    kv_pair_free(*value_loc,omap->access.free_key, omap->free_data);
-    
-    dll_rem_node(&omap->data, *node);
-    hm_remove(&omap->access, key);
+inline kv_pair_t *om_get_first(omap_t *omap)
+{
+	if (!omap->data.head)
+		return NULL;
+	return (kv_pair_t *)omap->data.head->data;
 }
 
-void om_remove_first(omap_t* omap) {
-    if(!omap->data.size) return;
-    kv_pair_t pair = *(kv_pair_t*)omap->data.head->data;
-    dll_remh(&omap->data);
-    hm_remove(&omap->access, pair.key);
-    kv_pair_free(pair, omap->access.free_key, omap->free_data);
+inline size_t om_has(omap_t *omap, void *key)
+{
+	return hm_has(&omap->access, key);
 }
 
-inline void *om_get(omap_t* omap, void* key) {
-    dlnode_t** node_ref = hm_get(&omap->access, key);
-
-    return node_ref ? ((kv_pair_t*)(*node_ref)->data)->value : NULL;
+inline iter_t omap_t_iter_new(omap_t *omap)
+{
+	return dlist_t_iter_new(&omap->data);
 }
 
-inline size_t om_has(omap_t* omap, void* key) {
-    return hm_has(&omap->access, key);
+inline iter_t omap_t_iter_rev(omap_t *omap)
+{
+	return dlist_t_iter_rev(&omap->data);
 }
 
-inline iter_t omap_t_iter_new(omap_t* omap) {
-    return dlist_t_iter_new(&omap->data);
-}
+inline void omap_t_iter_next(iter_t *iter) { dlist_t_iter_next(iter); }
 
-inline iter_t omap_t_iter_rev(omap_t* omap) {
-    return dlist_t_iter_rev(&omap->data);
-}
+inline void omap_t_iter_prev(iter_t *iter) { dlist_t_iter_prev(iter); }
 
-inline void omap_t_iter_next(iter_t *iter){
-    dlist_t_iter_next(iter);
-}
-
-inline void omap_t_iter_prev(iter_t *iter){ 
-    dlist_t_iter_prev(iter);
-}
-
-void om_free(omap_t* omap) {
-    hm_free(&omap->access);
-    for_iter(dlist_t, i, &omap->data) {
-        kv_pair_free(DLITER_VAL(i, kv_pair_t), omap->access.free_key, omap->free_data);
-    }
-    dll_free(&omap->data);
+void om_free(omap_t *omap)
+{
+	hm_free(&omap->access);
+	for_iter(dlist_t, i, &omap->data)
+	{
+		kv_pair_data_free(DLITER_VAL(i, kv_pair_t), omap->access.key_proto,
+						  omap->value_proto);
+	}
+	dll_free(&omap->data);
 }

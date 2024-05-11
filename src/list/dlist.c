@@ -63,9 +63,10 @@ static inline void __dlnode_safe_remove(dlist_t *list, dlnode_t *node)
 	list->size--;
 }
 
-
-inline void dlnode_free(dlnode_t *node)
+inline void dlnode_free(dlnode_t *node, prototype_t *data_proto)
 {
+	if (data_proto->free)
+		data_proto->free(node->data);
 	free(node->data);
 	free(node);
 }
@@ -103,7 +104,6 @@ void dlist_t_iter_prev(iter_t *iter)
 	iter->current = ((dlnode_t *)iter->current)->prev;
 }
 
-
 /**
  * \brief Jumps to the node at position `index` from `list`.
  *
@@ -120,7 +120,8 @@ static dlnode_t *dll_jump(dlist_t *list, size_t index)
 	/* Find out if it is faster to iterate from the front or back */
 	if (index > list->size / 2) {
 		size_t iter_index = list->size - 1;
-		for_iter_rev(dlist_t, i, list) {
+		for_iter_rev(dlist_t, i, list)
+		{
 			if (iter_index == index || !ITER_VAL(i, dlnode_t).prev)
 				return &ITER_VAL(i, dlnode_t);
 
@@ -128,7 +129,8 @@ static dlnode_t *dll_jump(dlist_t *list, size_t index)
 		}
 	} else {
 		size_t iter_index = 0;
-		for_iter(dlist_t, i, list) {
+		for_iter(dlist_t, i, list)
+		{
 			if (iter_index == index || !ITER_VAL(i, dlnode_t).next)
 				return &ITER_VAL(i, dlnode_t);
 
@@ -148,10 +150,10 @@ static dlnode_t *dll_jump(dlist_t *list, size_t index)
  *
  * \note This is for internal use only.
  */
-static dlnode_t *dlnode_new(size_t dat_size, void *dat)
+static dlnode_t *dlnode_new(prototype_t *data_proto, void *dat)
 {
-	void *data = malloc(dat_size);
-	memcpy(data, dat, dat_size);
+	void *data = malloc(data_proto->size);
+	data_proto->clone(data, dat);
 
 	dlnode_t *node = malloc(sizeof(dlnode_t));
 	*node = (dlnode_t){.data = data, .next = NULL, .prev = NULL};
@@ -174,13 +176,13 @@ inline void dll_addt(dlist_t *list, void *data)
 
 void dll_add_after(dlist_t *list, dlnode_t *node, void *data)
 {
-	dlnode_t *lnode = dlnode_new(list->data_size, data);
+	dlnode_t *lnode = dlnode_new(list->data_proto, data);
 	__dlnode_safe_insert(list, &node->next, lnode);
 }
 
 void dll_add_index(dlist_t *list, size_t index, void *data)
 {
-	dlnode_t *lnode = dlnode_new(list->data_size, data);
+	dlnode_t *lnode = dlnode_new(list->data_proto, data);
 	if (!index || !list->size) {
 		__dlnode_safe_insert(list, &list->head, lnode);
 		return;
@@ -201,7 +203,7 @@ void dll_rem_node(dlist_t *list, dlnode_t *node)
 	if (!list->size)
 		return;
 	__dlnode_safe_remove(list, node);
-	dlnode_free(node);
+	dlnode_free(node, list->data_proto);
 }
 
 void dll_rem_index(dlist_t *list, size_t index)
@@ -210,7 +212,7 @@ void dll_rem_index(dlist_t *list, size_t index)
 		return;
 	dlnode_t *node = dll_jump(list, index);
 	__dlnode_safe_remove(list, node);
-	dlnode_free(node);
+	dlnode_free(node, list->data_proto);
 }
 
 inline void *dll_get(dlist_t *list, size_t index)
@@ -222,13 +224,13 @@ inline void *dll_get(dlist_t *list, size_t index)
 
 void dll_free(dlist_t *list)
 {
-	if(!list->size)
+	if (!list->size)
 		return;
 	for_iter(dlist_t, i, list)
 	{
 		if (&ITER_VAL(i, dlnode_t) == list->head)
 			continue;
-		dlnode_free(ITER_VAL(i, dlnode_t).prev);
+		dlnode_free(ITER_VAL(i, dlnode_t).prev, list->data_proto);
 	}
-	dlnode_free(list->tail);
+	dlnode_free(list->tail, list->data_proto);
 }

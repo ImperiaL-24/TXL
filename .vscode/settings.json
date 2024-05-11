@@ -91,6 +91,10 @@
     "utility": "c",
     "any": "c",
     "compare": "c",
-    "variant": "c"
+    "variant": "c",
+    "future": "c",
+    "text_encoding": "c",
+    "random": "c",
+    "sstream": "c"
   }
 }

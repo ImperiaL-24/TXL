@@ -6,9 +6,10 @@
  */
 #ifndef __DLIST__H__
 #define __DLIST__H__
+#include "../impl/iter.h"
+#include "../impl/proto.h"
 #include <stdlib.h>
 #include <string.h>
-#include "../impl/iter.h"
 /**
  * \brief A Doubly Linked List node. Represents a location in a `dlist_t`.
  */
@@ -20,23 +21,23 @@ typedef struct dlnode_t {
 
 /**
  * \brief A generic doubly linked list. `dlist_t` is an Iterable object.
- * This list implementation does not own its data, meaning it will have to freed.
- * The data is just shallow copied into the list.
+ * This list implementation does not own its data, meaning it will have to
+ * freed. The data is just shallow copied into the list.
  */
 typedef struct {
 	dlnode_t *head;
 	dlnode_t *tail;
 	size_t size;
-	size_t data_size;
+	prototype_t *data_proto;
 } dlist_t;
 
 /**
  * \brief Frees a node and the data inside.
  *
  * \param[in] node The node to free
- *
+ * \param[in] data_proto The prototype of the data
  */
-void dlnode_free(dlnode_t *node);
+void dlnode_free(dlnode_t *node, prototype_t *data_proto);
 
 /**
  * \brief Add `data` to the start of the `list`.
@@ -124,13 +125,14 @@ void dll_free(dlist_t *list);
 /**
  * \brief Creates a new list.
  *
- * \param[in] size [size_t] The size of the stored data
+ * \param[in] type <type> The type of the stored data
  *
  * \return [dlist_t] A new list instance.
  */
-#define DLIST_NEW(size)                                                        \
-	(dlist_t){                                                                          \
-		NULL, NULL, 0, size                                                    \
+#define DLIST_NEW(type)                                                        \
+	(dlist_t)                                                                  \
+	{                                                                          \
+		.head = NULL, .tail = NULL, .size = 0, .data_proto = PROTOTYPE(type)   \
 	}
 
 /**
@@ -195,6 +197,5 @@ void dlist_t_iter_prev(iter_t *iter);
  * \return [type] The current value of the iterator.
  */
 #define DLITER_VAL(iter, type) (*(type *)(ITER_VAL(iter, dlnode_t).data))
-
 
 #endif // !__DLIST__H__

@@ -1,4 +1,5 @@
 /**
+ * Copyright (c) 2024
  * \file str.h
  * \author Dobrescu Andrei-Traian - 315CA (andrei.dobrescu2402@stud.acs.upb.ro)
  * \date 2024-05-01
@@ -7,31 +8,56 @@
 #ifndef __STR__H__
 #define __STR__H__
 
-#include "impl/hash.h"
 #include "impl/cmp.h"
-#include "vec.h"
+#include "impl/hash.h"
+#include "impl/proto.h"
 #include <string.h>
-typedef  struct {
-    char* data;
-    size_t length;
-} str_t;
+#define MAX_FMT_LENGTH 4096
+/* A C String. Implements Hash, Compare, Clone and Free */
+typedef char *str_t;
 
-str_t str_ref_from(char* cstring);
+/**
+ * \brief Creates a `str_t` reference to a C String. Should be used when the C
+ * String outlives the created str_t and when actions are read-only.
+ *
+ * \param cstring The C String to reference
+ * \return The created string.
+ */
+str_t str_ref(str_t str);
 
-str_t str_from(char* cstring);
-
+/**
+ * \brief Clones a string.
+ *
+ * \param str The string to clone
+ * \return A different instance of the same string.
+ */
 str_t str_clone(str_t str);
 
-hash_t str_t_hash(void *key);
+/**
+ * \brief Frees a string from memory.
+ *
+ * \param str The string to free
+ */
+void str_free(void *str);
 
-cmp_t str_t_cmp(void* str1, void* str2);
-
+/* str_t Compare implementation */
 uint8_t str_eq(str_t str1, str_t str2);
 
-void str_t_clone(void* target, void* str);
+/**
+ * \brief Creates a formatted string
+ * \param[in] fmt [char*] The format
+ * \param[in] ... [ ??? ] The parameters in the format
+ */
+#define STR_FMT(fmt, ...)                                                      \
+	({                                                                         \
+		str_t __ret;                                                           \
+		char *__str = malloc(MAX_FMT_LENGTH * sizeof(char));                   \
+		snprintf(__str, MAX_FMT_LENGTH, fmt, __VA_ARGS__);                     \
+		__ret = str_from(__str);                                               \
+		free(__str);                                                           \
+		__ret;                                                                 \
+	})
 
-void str_free(void* str);
+DECLARE_PROTO(str_t);
 
-#define str_t_free str_free
-
-#endif  //!__STR__H__
+#endif // !__STR__H__

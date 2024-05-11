@@ -1,4 +1,5 @@
 /**
+ * Copyright (c) 2024
  * \file hmap.h
  * \author Dobrescu Andrei-Traian - 315CA (andrei.dobrescu2402@stud.acs.upb.ro)
  * \date 2024-05-01
@@ -7,56 +8,89 @@
 #ifndef __HMAP__H__
 #define __HMAP__H__
 
-#include "../impl/hash.h"
 #include "../impl/cmp.h"
+#include "../impl/hash.h"
+#include "../impl/proto.h"
 #include "../list/list.h"
-
 /**
  * \brief An Unordered HashMap.
  * The hashmap owns it's data, making a deep copy of the data and its keys.
  */
 typedef struct {
-    hash_t (*hash_key)(void*);
-    cmp_t (*cmp_key)(void*, void*);
+	prototype_t *key_proto;
+	prototype_t *value_proto;
 
-    void (*free_key)(void*);
-    void (*free_data)(void*);
-
-    void (*clone_key)(void*,void*);
-    void (*clone_data)(void*,void*);
-
-    size_t data_size;
-    size_t key_size;
-    size_t length;
-    size_t capacity;
-    list_t* lists;
+	size_t data_size;
+	size_t length;
+	size_t capacity;
+	list_t *lists;
 } hmap_t;
 
 /**
- * \brief A key-value pair.
+ * \brief Creates a new Unordered Hashmap. For ease of use, please use
+ * `HMAP_NEW`.
+ *
+ * \param hash_function How to hash a key
+ * \param cmp_function How to compare 2 keys
+ * \param free_key How to free a key
+ * \param free_data How to free the data
+ * \param clone_key How to clone a key
+ * \param clone_data How to clone data
+ * \param key_size The size of the key
+ * \param data_size The size of the data
+ * \return The created map.
  */
-typedef struct {
-    void* key;
-    void* value;
-} kv_pair_t;
+hmap_t hm_new(prototype_t *key_proto, prototype_t *value_proto);
 
-kv_pair_t kv_pair_new(void* key, void* value, void (*clone_key)(void*, void*), void (*clone_data)(void*, void*), size_t key_size, size_t data_size);
+/**
+ * \brief Sets `value` in the map at `key`.
+ *
+ * \param[in] omap The Unordered HashMap to set at
+ * \param[in] key The key of the value
+ * \param[in] value The value to set
+ */
+void hm_set(hmap_t *hmap, void *key, void *value);
 
-void kv_pair_free(kv_pair_t pair, void (*free_key)(void*), void (*free_value)(void*));
+/**
+ * \brief Removes the value added in the map with `key`.
+ *
+ * \param[in] omap The Unordered HashMap to remove from
+ * \param[in] key The key of the value
+ */
+void hm_remove(hmap_t *hmap, void *key);
 
+/**
+ * \brief Gets the value added in the map with `key`.
+ *
+ * \param[in] omap The Unordered HashMap to get from
+ * \param[in] key The key of the value
+ * \return The value stored at `key`. If no such value exists, returns `NULL`.
+ */
+void *hm_get(hmap_t *hmap, void *key);
 
-hmap_t hm_new(hash_t (*hash_function)(void*), cmp_t (*cmp_function)(void*, void*), void (*free_key)(void*),void (*free_data)(void*), void (*clone_key)(void*, void*), void (*clone_data)(void*, void*), size_t key_size, size_t data_size);
+/**
+ * \brief Checks if a map contains `key`.
+ *
+ * \param omap The Unordered HashMap to check
+ * \param key The key to check
+ * \return `1` if the map contains the key. `0` otherwise.
+ */
+size_t hm_has(hmap_t *hmap, void *key);
 
-void hm_set(hmap_t* hmap, void* key, void* value);
+/**
+ * \brief Frees an Unordered HashMap from memory.
+ *
+ * \param omap The map to free.
+ */
+void hm_free(hmap_t *hmap);
 
-void hm_remove(hmap_t* hmap, void* key);
-
-void *hm_get(hmap_t* hmap, void* key);
-
-size_t hm_has(hmap_t* hmap, void* key);
-
-void hm_free(hmap_t* hmap);
-
-#define HMAP_NEW(key_type, value_type) hm_new(key_type##_hash, key_type##_cmp, key_type##_free, value_type##_free, key_type##_clone, value_type##_clone, sizeof(key_type), sizeof(value_type))
-
-#endif  //!__HMAP__H__
+/**
+ * \brief Creates a new Unordered HashMap.
+ *
+ * \param[in] key_type <type: Hash + Compare + Clone + Free> The type of the key
+ * \param[in] value_type <type: Clone + Free> The type of the value
+ *
+ */
+#define HMAP_NEW(key_type, value_type)                                         \
+	hm_new(PROTOTYPE(key_type), PROTOTYPE(value_type))
+#endif // !__HMAP__H__

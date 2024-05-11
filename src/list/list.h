@@ -6,9 +6,10 @@
  */
 #ifndef __LIST__H__
 #define __LIST__H__
+#include "../impl/iter.h"
+#include "../impl/proto.h"
 #include <stdlib.h>
 #include <string.h>
-#include "../impl/iter.h"
 /**
  * \brief A Singly Linked List node. Represents a location in a `list_t`.
  */
@@ -19,14 +20,14 @@ typedef struct lnode_t {
 
 /**
  * \brief A generic singly linked list. `list_t` is a One Way Iterable object.
- * This list implementation does not own its data, meaning it will have to freed.
- * The data is just shallow copied into the list.
+ * This list implementation does not own its data, meaning it will have to
+ * freed. The data is just shallow copied into the list.
  */
 typedef struct {
 	lnode_t *head;
 	lnode_t *tail;
 	size_t size;
-	size_t data_size;
+	prototype_t *data_proto;
 } list_t;
 
 /**
@@ -79,10 +80,10 @@ void sll_remh(list_t *list);
  *
  * \param[in] list The list to remove the element from
  * \param[in] prev The previous element
- * 
+ *
  * \note If `prev` is `NULL` then it will remove the head of the list.
  */
-void sll_rem_after(list_t *list, lnode_t* prev);
+void sll_rem_after(list_t *list, lnode_t *prev);
 
 /**
  * \brief Remove the element at position `index` from `list`.
@@ -117,14 +118,12 @@ void sll_free(list_t *list);
 /**
  * \brief Creates a new list.
  *
- * \param[in] size [size_t] The size of the stored data
+ * \param[in] type <type> The size of the stored data
  *
  * \return [list_t] A new list instance.
  */
-#define LIST_NEW(size)                                                        \
-	(list_t){                                                                          \
-		NULL, NULL, 0, size                                                    \
-	}
+#define LIST_NEW(type)                                                         \
+	(list_t) { NULL, NULL, 0, PROTOTYPE(type) }
 
 /**
  * \brief Gets the data at position `index` from `list` as a `type`.
