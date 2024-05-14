@@ -27,8 +27,15 @@ typedef struct {
 	lnode_t *head;
 	lnode_t *tail;
 	size_t size;
-	prototype_t *data_proto;
+	const prototype_t *data_proto;
 } list_t;
+
+/**
+ * \brief Creates a new Singly Linked List.
+ *
+ * \param[in] data_proto The prototype of the data to add
+ */
+list_t sll_new(const prototype_t *data_proto);
 
 /**
  * \brief Add `data` to the start of the `list`.
@@ -122,8 +129,7 @@ void sll_free(list_t *list);
  *
  * \return [list_t] A new list instance.
  */
-#define LIST_NEW(type)                                                         \
-	(list_t) { NULL, NULL, 0, PROTOTYPE(type) }
+#define LIST_NEW(type) sll_new(PROTOTYPE(type))
 
 /**
  * \brief Gets the data at position `index` from `list` as a `type`.
@@ -140,24 +146,6 @@ void sll_free(list_t *list);
 #define LIST_GET(list, type, index) (*(type *)sll_get(list, index))
 
 /**
- * \brief Creates an iterator from a Singly Linked List.
- *
- * \param[in] list The list to iterate
- *
- * \return The created iterator.
- */
-iter_t list_t_iter_new(list_t *list);
-
-/**
- * \brief Moves the iterator `iter` to the next value, if it iterates over a
- * Singly Linked List.
- *
- * \param[in] iter The iterator to move
- *
- */
-void list_t_iter_next(iter_t *iter);
-
-/**
  * \brief Gets the current data at which `iter` is at, as a `type`, if the
  * iterable is a Singly Linked List. Since an iterator over a `list_t` iterates
  * over nodes, using the normal methods would get the node at which is at and
@@ -169,5 +157,7 @@ void list_t_iter_next(iter_t *iter);
  * \return [type] The current value of the iterator.
  */
 #define SLITER_VAL(iter, type) (*(type *)(ITER_VAL(iter, lnode_t).data))
+
+DECLARE_PROTO(list_t);
 
 #endif // !__LIST__H__

@@ -5,6 +5,32 @@
 
 This is an extension/wrapper of the C Standard Library featuring Lists, Maps, Iterators, Strings, A prototype system with Traits, and so on.
 
+#### TODO:
+- ? Add A Tree
+- T/C Treap
+- T TreeSet 
+- T HashSet
+
+- TreeSet can be used for storing friends of a user. Iter and IterRev can be implemented for a TreeSet
+	- If is Right Leaf, go to Parent.
+	- If has Left SubTree, go to Successor.
+	- If no Left SubTree, go to Grandfather (If Grandfather is the root, and I am a leftist Child kill iteration).
+
+Operation|HashSet         |   TreeSet|
+| ---- | ----- |----- |
+| Sorted Insert| O(n)       | O(logn)|
+| Unsorted Insert| O(1)       | N/A|
+| Remove| O(1)       | O(logn)|
+| Has   | O(1)       | O(1)|
+| Sort  | O(n^2)   | N/A |
+| Reunion  | O(n+m-k)   | O((n+m-k)log(n+m-k))|
+| Intersection  | O(k)   | O(klogk)|
+
+
+> n = card(A) 
+> m = card(B) 
+> k = card(A ∩ B) 
+
 ## Documentation Standard
 
 For the documentation of certain macros, the type of the expected parameters has been placed in the docs. The standard for the notation is as follows:
@@ -135,8 +161,6 @@ Required function: `cmp_t #cmp(void*, void*)`
 
 The `#cmp` function compares the values at the 2 passed parameters and returns a `cmp_t` value, signaling if the first paramater is `EQUAL`, `BIGGER` or `SMALLER` than the second parameter. 
 
-#### TODO: add The ITER and ITER_REV traits to the prototype.
-
 ### The ITER Trait
 
 Required functions: `iter_t #iter_new(type_t)`, `void #iter_next(iter_t*)`
@@ -182,12 +206,12 @@ The Hashmap is a Dynamic Array of `list_t`. It can resize when it fills up. The 
 
 `hmap_t` does not implement `Iter` or `IterRev` because adding or removing elements in the hashmap can completely change the order of elements. (And because I would also need to change a lot in the `iter_t` struct for this to work).
 
-### Ordered Map - `omap_t`
+### LinkedHashMap - `lmap_t`
 
 The Ordered Map has a normal hashmap and a Doubly Linked List inside that keeps the order of the elements and keeps the `O(1)` access time. The order of insertion is kept in the hashmap as insertion is done only at the end. 
-Because `omap_t` has a `dlist_t` to keep the order, `omap_t` implements `Iter` and `IterRev`.
+Because `lmap_t` has a `dlist_t` to keep the order, `lmap_t` implements `Iter` and `IterRev`.
 
-The `omap_t` API exposes a way to get and remove the first element in the list of the `omap_t`.
+The `lmap_t` API exposes a way to get and remove the first element in the list of the `lmap_t`.
 
 ### Iterator - `iter_t`
 

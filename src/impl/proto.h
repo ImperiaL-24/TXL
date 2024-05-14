@@ -10,15 +10,25 @@
 
 #include "cmp.h"
 #include "hash.h"
+#include "iter.h"
 #include "stdlib.h"
-
 /* How to implement the traits in a prototype */
 
-#define __TYPE_IMPL_HASH(type) proto.hash = type##_hash;
-#define __TYPE_IMPL_CLONE(type) proto.clone = type##_clone;
-#define __TYPE_IMPL_FREE(type) proto.free = type##_free;
-#define __TYPE_IMPL_FREE_DEFAULT(type) proto.free = NULL;
-#define __TYPE_IMPL_CMP(type) proto.cmp = type##_cmp;
+#define __TYPE_IMPL_HASH(type) .hash = type##_hash,
+#define __TYPE_IMPL_CLONE(type) .clone = type##_clone,
+#define __TYPE_IMPL_FREE(type) .free = type##_free,
+#define __TYPE_IMPL_FREE_DEFAULT(type) .free = NULL,
+#define __TYPE_IMPL_CMP(type) .cmp = type##_cmp,
+
+#define __TYPE_IMPL_ITER(type)                                                 \
+	.iter_new = type##_iter_new, .iter_next = type##_iter_next,
+
+#define __TYPE_IMPL_ITER_REV(type)                                             \
+	.iter_rev = type##_iter_rev, .iter_prev = type##_iter_prev,
+
+#define __TYPE_IMPL_SET(type)                                                  \
+	.set_add = type##_set_add, .set_remove = type##_set_remove,                \
+	.set_has = type##_set_has, __TYPE_IMPL_ITER(type)
 
 /* Generic Trait Implementation */
 
@@ -40,27 +50,32 @@
 	(type, __VA_ARGS__)
 
 typedef struct {
-	// size_t trait_code;
 	size_t size;
 	hash_t (*hash)(void *);
 	cmp_t (*cmp)(void *, void *);
 	void (*free)(void *);
 	void (*clone)(void *, void *);
+
+	iter_t (*iter_new)(void *itrble);
+	iter_t (*iter_rev)(void *itrble);
+	void (*iter_next)(iter_t *iter);
+	void (*iter_prev)(iter_t *iter);
+
+	iter_t (*set_add)(void *itrble);
+	iter_t (*set_remove)(void *itrble);
+	void (*set_has)(iter_t *iter);
+
 } prototype_t;
 
 #define DEFINE_PROTO(type, ...)                                                \
-	prototype_t *__##type##_proto()                                            \
+	const prototype_t *__##type##_proto()                                      \
 	{                                                                          \
-		static prototype_t proto = {.size = 0};                                \
-		if (proto.size == 0) {                                                 \
-                                                                               \
-			IMPL_TRAITS(type, __VA_ARGS__)                                     \
-			proto.size = sizeof(type);                                         \
-		}                                                                      \
+		static const prototype_t proto = {                                     \
+			IMPL_TRAITS(type, __VA_ARGS__).size = sizeof(type)};               \
 		return &proto;                                                         \
 	}
 
-#define DECLARE_PROTO(type) prototype_t *__##type##_proto()
+#define DECLARE_PROTO(type) const prototype_t *__##type##_proto()
 
 #define PROTOTYPE(type) __##type##_proto()
 

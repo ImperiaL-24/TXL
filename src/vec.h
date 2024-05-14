@@ -7,14 +7,16 @@
 #ifndef __VEC__H__
 #define __VEC__H__
 #include "err.h"
-#include <stdlib.h>
 #include "impl/iter.h"
+#include "impl/proto.h"
+#include <stdlib.h>
+
 /**
  * \brief A generic resizeable vector. `vec_t` is an Iterable object.
  */
 typedef struct {
 	void *data;
-	size_t data_size;
+	const prototype_t *data_proto;
 	size_t len;
 	size_t capacity;
 } vec_t;
@@ -27,7 +29,7 @@ typedef struct {
  *
  * \return A new vector instance.
  */
-vec_t vec_new(size_t data_size);
+vec_t vec_new(const prototype_t *data_proto);
 
 /**
  * \brief Adds the value in `data` at the end of `vec`
@@ -78,7 +80,7 @@ void vec_free(vec_t *vec);
 #define VEC_ADR(vec, index)                                                    \
 	({                                                                         \
 		vec_t *__vci = (vec);                                                  \
-		(char *)((__vci)->data) + (index) * (__vci)->data_size;                \
+		(char *)((__vci)->data) + (index) * (__vci)->data_proto->size;         \
 	})
 
 /**
@@ -152,40 +154,6 @@ void vec_free(vec_t *vec);
 		__ret;                                                                 \
 	})
 
-/**
- * \brief Creates an iterator from a Vector.
- *
- * \param[in] list The list to iterate
- *
- * \return The created iterator.
- */
-iter_t vec_t_iter_new(vec_t *list);
-
-/**
- * \brief Creates a reverse iterator from a Vector.
- *
- * \param[in] list The list to iterate in reverse
- *
- * \return The created iterator.
- */
-iter_t vec_t_iter_rev(vec_t *list);
-
-/**
- * \brief Moves the iterator `iter` to the next value, if it iterates over a
- * Vector.
- *
- * \param[in] iter The iterator to move
- *
- */
-void vec_t_iter_next(iter_t *iter);
-
-/**
- * \brief Moves the iterator `iter` to the previous value, if it iterates over a
- * Vector.
- *
- * \param[in] iter The iterator to move
- *
- */
-void vec_t_iter_prev(iter_t *iter);
+DECLARE_PROTO(vec_t);
 
 #endif //!__VEC__H__

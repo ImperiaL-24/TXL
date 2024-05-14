@@ -20,4 +20,4 @@
 		*(type *)target = *(type *)origin;                                     \
 	}
 
-#endif  // !__CLONE__H__
+#endif // !__CLONE__H__

@@ -31,8 +31,8 @@ typedef struct {
  *
  * \return The created key-value pair.
  */
-kv_pair_t kv_pair_new(void *key, void *value, prototype_t *key_proto,
-					  prototype_t *value_proto);
+kv_pair_t kv_pair_new(void *key, void *value, const prototype_t *key_proto,
+					  const prototype_t *value_proto);
 
 /**
  * \brief Deep Frees a key-value pair.
@@ -42,8 +42,8 @@ kv_pair_t kv_pair_new(void *key, void *value, prototype_t *key_proto,
  * \param free_value How to free the value
  *
  */
-void kv_pair_deep_free(kv_pair_t pair, prototype_t *key_proto,
-					   prototype_t *value_proto);
+void kv_pair_deep_free(kv_pair_t pair, const prototype_t *key_proto,
+					   const prototype_t *value_proto);
 /**
  * \brief Frees the data held by a key-value pair.
  *
@@ -52,8 +52,8 @@ void kv_pair_deep_free(kv_pair_t pair, prototype_t *key_proto,
  * \param free_value How to free the value
  *
  */
-void kv_pair_data_free(kv_pair_t pair, prototype_t *key_proto,
-					   prototype_t *value_proto);
+void kv_pair_data_free(kv_pair_t pair, const prototype_t *key_proto,
+					   const prototype_t *value_proto);
 DECLARE_PROTO(kv_pair_t);
 
 #endif //!__KV_PAIR__H__

@@ -8,8 +8,8 @@
 #include "kv_pair.h"
 #include "../impl/clone.h"
 
-kv_pair_t kv_pair_new(void *key, void *value, prototype_t *key_proto,
-					  prototype_t *value_proto)
+kv_pair_t kv_pair_new(void *key, void *value, const prototype_t *key_proto,
+					  const prototype_t *value_proto)
 {
 	void *new_data = malloc(value_proto->size);
 	value_proto->clone(new_data, value);
@@ -22,8 +22,8 @@ kv_pair_t kv_pair_new(void *key, void *value, prototype_t *key_proto,
 	return pair;
 }
 
-inline void kv_pair_data_free(kv_pair_t pair, prototype_t *key_proto,
-							  prototype_t *value_proto)
+inline void kv_pair_data_free(kv_pair_t pair, const prototype_t *key_proto,
+							  const prototype_t *value_proto)
 {
 	if (key_proto->free)
 		key_proto->free(pair.key);
@@ -31,8 +31,8 @@ inline void kv_pair_data_free(kv_pair_t pair, prototype_t *key_proto,
 		value_proto->free(pair.value);
 }
 
-void kv_pair_deep_free(kv_pair_t pair, prototype_t *key_proto,
-					   prototype_t *value_proto)
+void kv_pair_deep_free(kv_pair_t pair, const prototype_t *key_proto,
+					   const prototype_t *value_proto)
 {
 	kv_pair_data_free(pair, key_proto, value_proto);
 	free(pair.key);

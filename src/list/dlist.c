@@ -5,7 +5,6 @@
  * \brief Doubly-Linked List Implementation
  */
 #include "dlist.h"
-
 /**
  * \brief Inserts a node between 2 other nodes.
  *
@@ -63,45 +62,12 @@ static inline void __dlnode_safe_remove(dlist_t *list, dlnode_t *node)
 	list->size--;
 }
 
-inline void dlnode_free(dlnode_t *node, prototype_t *data_proto)
+inline void dlnode_free(dlnode_t *node, const prototype_t *data_proto)
 {
 	if (data_proto->free)
 		data_proto->free(node->data);
 	free(node->data);
 	free(node);
-}
-
-/**
- * \brief Creates an `iter_t` from a `list` and a starting node.
- *
- * \param[in] list The list to iterate from
- * \param[in] start The starting node
- *
- * \return The created iterator.
- */
-static inline iter_t iter_from(dlist_t *list, dlnode_t *start)
-{
-	return (iter_t){.current = start, .iterable = list};
-}
-
-inline iter_t dlist_t_iter_new(dlist_t *list)
-{
-	return iter_from(list, list->head);
-}
-
-inline iter_t dlist_t_iter_rev(dlist_t *list)
-{
-	return iter_from(list, list->tail);
-}
-
-void dlist_t_iter_next(iter_t *iter)
-{
-	iter->current = ((dlnode_t *)iter->current)->next;
-}
-
-void dlist_t_iter_prev(iter_t *iter)
-{
-	iter->current = ((dlnode_t *)iter->current)->prev;
 }
 
 /**
@@ -150,7 +116,7 @@ static dlnode_t *dll_jump(dlist_t *list, size_t index)
  *
  * \note This is for internal use only.
  */
-static dlnode_t *dlnode_new(prototype_t *data_proto, void *dat)
+static dlnode_t *dlnode_new(const prototype_t *data_proto, void *dat)
 {
 	void *data = malloc(data_proto->size);
 	data_proto->clone(data, dat);
@@ -231,6 +197,82 @@ void dll_free(dlist_t *list)
 		if (&ITER_VAL(i, dlnode_t) == list->head)
 			continue;
 		dlnode_free(ITER_VAL(i, dlnode_t).prev, list->data_proto);
+		// dlnode_free(&ITER_VAL(i, dlnode_t), list->data_proto);
 	}
 	dlnode_free(list->tail, list->data_proto);
 }
+
+/**
+ * \brief Creates an `iter_t` from a `list` and a starting node.
+ *
+ * \param[in] list The list to iterate from
+ * \param[in] start The starting node
+ *
+ * \return The created iterator.
+ */
+static inline iter_t iter_from(dlist_t *list, dlnode_t *start, dlnode_t *next)
+{
+	return (iter_t){.current = start, .iterable = list, .next = next};
+}
+
+/**
+ * \brief Creates an iterator from a Doubly Linked List.
+ *
+ * \param[in] list The list to iterate
+ *
+ * \return The created iterator.
+ */
+iter_t dlist_t_iter_new(void *list)
+{
+	dlist_t *cast_list = (dlist_t *)list;
+	dlnode_t *next = cast_list->head ? cast_list->head->next : NULL;
+	return iter_from(list, cast_list->head, next);
+}
+
+/**
+ * \brief Creates a reverse iterator from a Doubly Linked List.
+ *
+ * \param[in] list The list to iterate in reverse
+ *
+ * \return The created iterator.
+ */
+iter_t dlist_t_iter_rev(void *list)
+{
+	dlist_t *cast_list = (dlist_t *)list;
+	dlnode_t *prev = cast_list->tail ? cast_list->tail->prev : NULL;
+	return iter_from(list, ((dlist_t *)list)->tail, prev);
+}
+
+/**
+ * \brief Moves the iterator `iter` to the next value, if it iterates over a
+ * Doubly Linked List.
+ *
+ * \param[in] iter The iterator to move
+ *
+ */
+void dlist_t_iter_next(iter_t *iter)
+{
+	iter->current = iter->next;
+	if (iter->current)
+		iter->next = ((dlnode_t *)(iter->current))->next;
+
+	// iter->current = ((dlnode_t *)iter->current)->next;
+}
+
+/**
+ * \brief Moves the iterator `iter` to the previous value, if it iterates over a
+ * Doubly Linked List.
+ *
+ * \param[in] iter The iterator to move
+ *
+ */
+void dlist_t_iter_prev(iter_t *iter)
+{
+	iter->current = iter->next;
+	if (iter->current)
+		iter->next = ((dlnode_t *)(iter->current))->prev;
+
+	// iter->current = ((dlnode_t *)iter->current)->prev;
+}
+
+DEFINE_PROTO(dlist_t, ITER, ITER_REV);

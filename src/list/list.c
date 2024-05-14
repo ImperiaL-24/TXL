@@ -66,7 +66,7 @@ static inline void __lnode_safe_remove(list_t *list, lnode_t *prev)
  *
  * \note This is for internal use only.
  */
-static inline void __lnode_free(lnode_t *node, prototype_t *data_proto)
+static inline void __lnode_free(lnode_t *node, const prototype_t *data_proto)
 {
 	if (data_proto->free)
 		data_proto->free(node->data);
@@ -74,14 +74,9 @@ static inline void __lnode_free(lnode_t *node, prototype_t *data_proto)
 	free(node);
 }
 
-inline iter_t list_t_iter_new(list_t *list)
+inline list_t sll_new(const prototype_t *data_proto)
 {
-	return (iter_t){.current = list->head, .iterable = list};
-}
-
-void list_t_iter_next(iter_t *iter)
-{
-	iter->current = ((lnode_t *)iter->current)->next;
+	return (list_t){NULL, NULL, 0, data_proto};
 }
 
 /**
@@ -119,7 +114,7 @@ static lnode_t *sll_jump(list_t *list, size_t index)
  *
  * \note This is for internal use only.
  */
-static lnode_t *lnode_new(prototype_t *data_proto, void *dat)
+static lnode_t *lnode_new(const prototype_t *data_proto, void *dat)
 {
 	void *data = malloc(data_proto->size);
 	data_proto->clone(data, dat);
@@ -219,3 +214,34 @@ void sll_free(list_t *list)
 		current = nxt;
 	}
 }
+
+/**
+ * \brief Creates an iterator from a Singly Linked List.
+ *
+ * \param[in] list The list to iterate
+ *
+ * \return The created iterator.
+ */
+static inline iter_t list_t_iter_new(void *list)
+{
+	return (iter_t){
+		.current = ((list_t *)list)->head,
+		.iterable = list,
+		.next = ((list_t *)list)->head ? ((list_t *)list)->head->next : NULL};
+}
+
+/**
+ * \brief Moves the iterator `iter` to the next value, if it iterates over a
+ * Singly Linked List.
+ *
+ * \param[in] iter The iterator to move
+ *
+ */
+static void list_t_iter_next(iter_t *iter)
+{
+	iter->current = iter->next;
+	if (iter->current)
+		iter->next = ((lnode_t *)(iter->current))->next;
+}
+
+DEFINE_PROTO(list_t, ITER);

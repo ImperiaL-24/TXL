@@ -5,11 +5,13 @@
 
 #include "impl/int_impl.h"
 #include "map/hmap.h"
-#include "map/omap.h"
+#include "map/lmap.h"
 
 #include "err.h"
 
 #include "impl/clone.h"
+
+#include "vec.h"
 
 typedef struct {
 	char code;
@@ -32,6 +34,13 @@ int main()
 	sll_addh(&list, &data);
 	data = 9;
 	sll_add_index(&list, 100, &data);
+
+	vec_t vec = vec_new(PROTOTYPE(uint32_t));
+
+	for (int i = 0; i < 10; i++)
+		vec_insert(&vec, 0, &i);
+	for_iter(vec_t, i, &vec) { printf("%d ", ITER_VAL(i, uint32_t)); }
+	vec_free(&vec);
 
 	DIE(*(uint32_t *)sll_get(&list, 0) != 13, "TEST 1 FAIL");
 	DIE(*(uint32_t *)sll_get(&list, 1) != 7, "TEST 1 FAIL");
@@ -93,99 +102,98 @@ int main()
 	hm_remove(&hmap, &key);
 	DIE(hm_has(&hmap, &key), "TEST 6 R FAIL");
 
-	omap_t omap = OMAP_NEW(uint32_t, uint32_t);
+	lmap_t lmap = LMAP_NEW(uint32_t, uint32_t);
 	key = 5;
 	value = 11;
-	om_set(&omap, &key, &value);
-	DIE(*(int *)om_get(&omap, &key) != 11, "TEST 7 1 FAIL");
-	DIE(omap.access.length != 1, "TEST 7 FAIL");
+	lm_set(&lmap, &key, &value);
+	DIE(*(int *)lm_get(&lmap, &key) != 11, "TEST 7 1 FAIL");
+	DIE(lmap.access.length != 1, "TEST 7 FAIL");
 
 	value = 18;
-	om_set(&omap, &key, &value);
-	DIE(*(int *)om_get(&omap, &key) != 18, "TEST 7 2 FAIL");
-	DIE(omap.access.length != 1, "TEST 7 3 FAIL");
+	lm_set(&lmap, &key, &value);
+	DIE(*(int *)lm_get(&lmap, &key) != 18, "TEST 7 2 FAIL");
+	DIE(lmap.access.length != 1, "TEST 7 3 FAIL");
 
 	key = 444;
 	value = 21;
-	om_set(&omap, &key, &value);
-	DIE(*(int *)om_get(&omap, &key) != 21, "TEST 7 4 FAIL");
-	DIE(omap.access.length != 2, "TEST 7 5 FAIL");
+	lm_set(&lmap, &key, &value);
+	DIE(*(int *)lm_get(&lmap, &key) != 21, "TEST 7 4 FAIL");
+	DIE(lmap.access.length != 2, "TEST 7 5 FAIL");
 
-	DIE(!om_has(&omap, &key), "TEST 8 FAIL");
+	DIE(!lm_has(&lmap, &key), "TEST 8 FAIL");
 	key = 5;
-	DIE(!om_has(&omap, &key), "TEST 8 FAIL");
+	DIE(!lm_has(&lmap, &key), "TEST 8 FAIL");
 	key = 7;
-	DIE(om_has(&omap, &key), "TEST 8 FAIL");
+	DIE(lm_has(&lmap, &key), "TEST 8 FAIL");
 	printf("\n");
 
 	key = 1;
 	value = 121;
-	om_set(&omap, &key, &value);
-	for_iter(omap_t, i, &omap) { printf("%d ", OMITER_VAL(i, uint32_t)); }
+	lm_set(&lmap, &key, &value);
+	for_iter(lmap_t, i, &lmap) { printf("%d ", LMITER_VAL(i, uint32_t)); }
 	printf("\n");
 	sll_free(&list);
 	hm_free(&hmap);
-	om_free(&omap);
+	lm_free(&lmap);
 
-	omap = OMAP_NEW(str_t, str_t);
+	lmap = LMAP_NEW(str_t, str_t);
 	str_t key_s = str_ref("test1");
 	str_t key_s1 = str_ref("key1");
 
-	om_set(&omap, &key_s, &str);
-	om_set(&omap, &key_s, &str2);
-	om_set(&omap, &key_s1, &str2);
+	lm_set(&lmap, &key_s, &str);
+	lm_set(&lmap, &key_s, &str2);
+	lm_set(&lmap, &key_s1, &str2);
 
-	DIE(!str_eq(*(str_t *)om_get(&omap, &key_s), str2), "TEST 9 FAIL");
-	DIE(!str_eq(*(str_t *)om_get(&omap, &key_s1), str2), "TEST 9 FAIL");
+	DIE(!str_eq(*(str_t *)lm_get(&lmap, &key_s), str2), "TEST 9 FAIL");
+	DIE(!str_eq(*(str_t *)lm_get(&lmap, &key_s1), str2), "TEST 9 FAIL");
 
-	om_remove(&omap, &key_s1);
-	DIE(om_has(&omap, &key_s1), "TEST 9 FAIL");
-	DIE(omap.access.length != 1, "TEST 9 FAIL");
+	lm_remove(&lmap, &key_s1);
+	DIE(lm_has(&lmap, &key_s1), "TEST 9 FAIL");
+	DIE(lmap.access.length != 1, "TEST 9 FAIL");
 
-	printf("%s\n", *(str_t *)om_get(&omap, &key_s));
-	om_free(&omap);
+	printf("%s\n", *(str_t *)lm_get(&lmap, &key_s));
+	lm_free(&lmap);
 
-	omap = OMAP_NEW(uint32_t, uint32_t);
+	lmap = LMAP_NEW(uint32_t, uint32_t);
 	for (int i = 0; i < 10; i++) {
-		om_set(&omap, &i, &i);
-		printf("NR: %d, HASH: %u\n", i, omap.access.key_proto->hash(&i));
+		lm_set(&lmap, &i, &i);
+		printf("NR: %d, HASH: %u\n", i, lmap.access.key_proto->hash(&i));
 	}
-	for_iter(omap_t, i, &omap)
+	for_iter(lmap_t, i, &lmap)
 	{
-		printf("VALUE: %d\n", OMITER_VAL(i, uint32_t));
+		printf("VALUE: %d\n", LMITER_VAL(i, uint32_t));
 	}
-	om_remove_first(&omap);
-	for_iter(omap_t, i, &omap)
+	lm_remove_first(&lmap);
+	for_iter(lmap_t, i, &lmap)
 	{
-		printf("VALUE: %d\n", OMITER_VAL(i, uint32_t));
+		printf("VALUE: %d\n", LMITER_VAL(i, uint32_t));
 	}
-	om_remove_first(&omap);
-	for_iter(omap_t, i, &omap)
+	lm_remove_first(&lmap);
+	for_iter(lmap_t, i, &lmap)
 	{
-		printf("VALUE: %d\n", OMITER_VAL(i, uint32_t));
+		printf("VALUE: %d\n", LMITER_VAL(i, uint32_t));
 	}
-	om_remove_first(&omap);
-	for_iter(omap_t, i, &omap)
+	lm_remove_first(&lmap);
+	for_iter(lmap_t, i, &lmap)
 	{
-		printf("VALUE: %d\n", OMITER_VAL(i, uint32_t));
+		printf("VALUE: %d\n", LMITER_VAL(i, uint32_t));
 	}
-	om_free(&omap);
+	lm_free(&lmap);
 
-	omap = OMAP_NEW(uint32_t, test_t);
+	lmap = LMAP_NEW(uint32_t, test_t);
 
 	test_t val = (test_t){.code = 'a', .val = 5};
 	key = 5;
-	om_set(&omap, &key, &val);
-	DIE(((test_t *)om_get(&omap, &key))->code != 'a', "TEST 10 FAIL");
-	DIE(((test_t *)om_get(&omap, &key))->val != 5, "TEST 10 FAIL");
+	lm_set(&lmap, &key, &val);
+	DIE(((test_t *)lm_get(&lmap, &key))->code != 'a', "TEST 10 FAIL");
+	DIE(((test_t *)lm_get(&lmap, &key))->val != 5, "TEST 10 FAIL");
 	key = 6;
-	om_set(&omap, &key, &val);
-	DIE(((test_t *)om_get(&omap, &key))->code != 'a', "TEST 10 FAIL");
-	DIE(((test_t *)om_get(&omap, &key))->val != 5, "TEST 10 FAIL");
-	om_remove_first(&omap);
-	om_remove_first(&omap);
-	DIE(omap.data.size, "TEST 10 FAIL");
+	lm_set(&lmap, &key, &val);
+	DIE(((test_t *)lm_get(&lmap, &key))->code != 'a', "TEST 10 FAIL");
+	DIE(((test_t *)lm_get(&lmap, &key))->val != 5, "TEST 10 FAIL");
+	lm_remove_first(&lmap);
+	lm_remove_first(&lmap);
+	DIE(lmap.data.size, "TEST 10 FAIL");
 
-	om_free(&omap);
-	// TODO: tests for int key and struct value;
+	lm_free(&lmap);
 }

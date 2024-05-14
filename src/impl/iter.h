@@ -48,13 +48,13 @@
  * Iterator implementation may create additional macros for directly getting the
  * data inside.
  *
- * \note This is a 2-way iterator, meaning this cannot be used for
- * singly-linked lists (unless you really want to hurt someone)
  *
  */
 typedef struct {
 	void *current;
 	void *iterable;
+	void *next;
+	size_t metadata;
 } iter_t;
 
 /**
@@ -79,8 +79,8 @@ typedef struct {
  * documentation for `iter_t`.
  */
 #define for_iter(itype, iter, itrable)                                         \
-	for (iter_t _##iter = itype##_iter_new(itrable); _##iter.current;          \
-		 itype##_iter_next(&_##iter))
+	for (iter_t _##iter = PROTOTYPE(itype)->iter_new(itrable);                 \
+		 _##iter.current; PROTOTYPE(itype)->iter_next(&_##iter))
 
 /**
  * \brief Iterates over a `itrable` of type `itype` from the end.
@@ -94,7 +94,7 @@ typedef struct {
  * the documentation for `iter_t`.
  */
 #define for_iter_rev(itype, iter, itrable)                                     \
-	for (iter_t _##iter = itype##_iter_rev(itrable); _##iter.current;          \
-		 itype##_iter_prev(&_##iter))
+	for (iter_t _##iter = PROTOTYPE(itype)->iter_rev(itrable);                 \
+		 _##iter.current; PROTOTYPE(itype)->iter_prev(&_##iter))
 
 #endif //!__ITER__H__

@@ -28,7 +28,7 @@ typedef struct {
 	dlnode_t *head;
 	dlnode_t *tail;
 	size_t size;
-	prototype_t *data_proto;
+	const prototype_t *data_proto;
 } dlist_t;
 
 /**
@@ -37,7 +37,7 @@ typedef struct {
  * \param[in] node The node to free
  * \param[in] data_proto The prototype of the data
  */
-void dlnode_free(dlnode_t *node, prototype_t *data_proto);
+void dlnode_free(dlnode_t *node, const prototype_t *data_proto);
 
 /**
  * \brief Add `data` to the start of the `list`.
@@ -150,42 +150,6 @@ void dll_free(dlist_t *list);
 #define DLIST_GET(list, type, index) (*(type *)dll_get(list, index))
 
 /**
- * \brief Creates an iterator from a Doubly Linked List.
- *
- * \param[in] list The list to iterate
- *
- * \return The created iterator.
- */
-iter_t dlist_t_iter_new(dlist_t *list);
-
-/**
- * \brief Creates a reverse iterator from a Doubly Linked List.
- *
- * \param[in] list The list to iterate in reverse
- *
- * \return The created iterator.
- */
-iter_t dlist_t_iter_rev(dlist_t *list);
-
-/**
- * \brief Moves the iterator `iter` to the next value, if it iterates over a
- * Doubly Linked List.
- *
- * \param[in] iter The iterator to move
- *
- */
-void dlist_t_iter_next(iter_t *iter);
-
-/**
- * \brief Moves the iterator `iter` to the previous value, if it iterates over a
- * Doubly Linked List.
- *
- * \param[in] iter The iterator to move
- *
- */
-void dlist_t_iter_prev(iter_t *iter);
-
-/**
  * \brief Gets the current data at which `iter` is at, as a `type`, if the
  * iterable is a Doubly Linked List. Since an iterator over a `dlist_t` iterates
  * over nodes, using the normal methods would get the node at which is at and
@@ -197,5 +161,7 @@ void dlist_t_iter_prev(iter_t *iter);
  * \return [type] The current value of the iterator.
  */
 #define DLITER_VAL(iter, type) (*(type *)(ITER_VAL(iter, dlnode_t).data))
+
+DECLARE_PROTO(dlist_t);
 
 #endif // !__DLIST__H__

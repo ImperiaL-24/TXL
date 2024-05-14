@@ -57,7 +57,7 @@ static int __hm_resize(hmap_t *hmap)
 	return 1;
 }
 
-hmap_t hm_new(prototype_t *key_proto, prototype_t *value_proto)
+hmap_t hm_new(const prototype_t *key_proto, const prototype_t *value_proto)
 {
 #define INITIAL_CAPACITY 10
 	hmap_t hmap;
