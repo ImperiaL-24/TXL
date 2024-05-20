@@ -13,6 +13,10 @@
 
 #include "vec.h"
 
+#include "set/hset.h"
+
+#include "impl/set.h"
+
 typedef struct {
 	char code;
 	int val;
@@ -196,4 +200,79 @@ int main()
 	DIE(lmap.data.size, "TEST 10 FAIL");
 
 	lm_free(&lmap);
+
+	hset_t hset = HSET_NEW(uint32_t);
+	value = 5;
+	hs_add(&hset, &value);
+
+	for_iter(hset_t, i, &hset) { printf("%d ", SLITER_VAL(i, uint32_t)); }
+	printf("\n");
+
+	DIE(!hs_has(&hset, &value), "TEST 11 1 FAIL");
+	DIE(hset.length != 1, "TEST 11 1 FAIL");
+
+	hs_remove(&hset, &value);
+
+	DIE(hs_has(&hset, &value), "TEST 11 2 FAIL");
+	DIE(hset.length != 0, "TEST 11 2 FAIL");
+
+	for (int i = 0; i < 100; i++) {
+		hs_add(&hset, &value);
+	}
+
+	DIE(!hs_has(&hset, &value), "TEST 11 3 AIL");
+	DIE(hset.length != 1, "TEST 11 3 FAIL");
+
+	for (int i = 0; i < 100; i++) {
+		hs_remove(&hset, &value);
+	}
+
+	DIE(hs_has(&hset, &value), "TEST 11 4 FAIL");
+	DIE(hset.length != 0, "TEST 11 4 FAIL");
+
+	for (int i = 0; i < 100; i++) {
+		hs_add(&hset, &i);
+	}
+
+	DIE(!hs_has(&hset, &value), "TEST 11 5 1 FAIL");
+	DIE(hset.length != 100, "TEST 11 5 2 FAIL");
+	for_iter(hset_t, i, &hset) { printf("%d ", SLITER_VAL(i, uint32_t)); }
+	printf("\n");
+
+	hs_free(&hset);
+
+	hset = HSET_NEW(uint32_t);
+	hset_t hset2 = HSET_NEW(uint32_t);
+
+	for (int i = 0; i < 20; i++) {
+		hs_add(&hset, &i);
+	}
+	DIE(hset.length != 20, "TEST 12 FAIL");
+	for_iter(hset_t, i, &hset) { printf("%d ", SLITER_VAL(i, uint32_t)); }
+	printf("\n");
+	for (int i = 20; i < 40; i++) {
+		hs_add(&hset2, &i);
+	}
+	for_iter(hset_t, i, &hset2) { printf("%d ", SLITER_VAL(i, uint32_t)); }
+	printf("\n");
+	set_reunion(&hset, &hset2, PROTOTYPE(hset_t), PROTOTYPE(hset_t));
+
+	for_iter(hset_t, i, &hset) { printf("%d ", SLITER_VAL(i, uint32_t)); }
+	printf("\n");
+	DIE(hset.length != 40, "TEST 12 FAIL");
+
+	set_subtract(&hset, &hset2, PROTOTYPE(hset_t), PROTOTYPE(hset_t));
+	DIE(hset.length != 20, "TEST 12 FAIL");
+
+	for_iter(hset_t, i, &hset) { printf("%d ", SLITER_VAL(i, uint32_t)); }
+	printf("\n");
+	set_reunion(&hset, &hset2, PROTOTYPE(hset_t), PROTOTYPE(hset_t));
+	set_intersect(&hset, &hset2, PROTOTYPE(hset_t), PROTOTYPE(hset_t));
+
+	for_iter(hset_t, i, &hset) { printf("%d ", SLITER_VAL(i, uint32_t)); }
+	printf("\n");
+	DIE(hset.length != 20, "TEST 12 FAIL");
+
+	hs_free(&hset);
+	hs_free(&hset2);
 }

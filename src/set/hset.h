@@ -12,20 +12,27 @@
 #include "../list/list.h"
 
 typedef struct {
-	prototype_t *data_proto;
+	const prototype_t *data_proto;
 	size_t length;
 	size_t capacity;
 	list_t *lists;
 } hset_t;
 
-hset_t hs_new(prototype_t *data_proto);
+hset_t hs_new(const prototype_t *data_proto);
 
-void hs_add(hset_t *hset, void *data);
+void hs_add(void *hset, void *data);
 
-void hs_remove(hset_t *hset, void *data);
+void hs_remove(void *hset, void *data);
 
-void hs_has(hset_t *hset, void *data);
+size_t hs_has(void *hset, void *data);
+
+void hs_free(hset_t *hset);
 
 DECLARE_PROTO(hset_t);
 
+/**
+ * \brief Creates a new Hashset that stores `type`
+ * \param[in] type - <type: Free + Clone + Hash + Cmp>
+ */
+#define HSET_NEW(type) hs_new(PROTOTYPE(type))
 #endif //!__HSET__H__

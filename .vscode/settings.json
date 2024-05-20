@@ -95,6 +95,7 @@
     "future": "c",
     "text_encoding": "c",
     "random": "c",
-    "sstream": "c"
+    "sstream": "c",
+    "source_location": "c"
   }
 }

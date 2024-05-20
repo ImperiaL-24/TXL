@@ -275,4 +275,9 @@ void dlist_t_iter_prev(iter_t *iter)
 	// iter->current = ((dlnode_t *)iter->current)->prev;
 }
 
-DEFINE_PROTO(dlist_t, ITER, ITER_REV);
+static void *dlist_t_iter_get(iter_t *iter)
+{
+	return ((dlnode_t *)iter->current)->data;
+}
+
+DEFINE_PROTO(dlist_t, ITER_FULL);

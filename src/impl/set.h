@@ -11,13 +11,13 @@
 #include "proto.h"
 
 // TODO Set operations
-void set_reunion(void *origin, void *other, const prototype_t origin_proto,
-				 const prototype_t other_proto);
+void set_reunion(void *origin, void *other, const prototype_t *origin_proto,
+				 const prototype_t *other_proto);
 
-void set_intersect(void *origin, void *other, const prototype_t origin_proto,
-				   const prototype_t other_proto);
+void set_intersect(void *origin, void *other, const prototype_t *origin_proto,
+				   const prototype_t *other_proto);
 
-void set_subtract(void *origin, void *other, const prototype_t origin_proto,
-				  const prototype_t other_proto);
+void set_subtract(void *origin, void *other, const prototype_t *origin_proto,
+				  const prototype_t *other_proto);
 
 #endif //!__SET__H__

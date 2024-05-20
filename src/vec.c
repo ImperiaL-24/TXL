@@ -165,4 +165,6 @@ static void vec_t_iter_prev(iter_t *iter)
 	iter->current = prev_adr;
 }
 
-DEFINE_PROTO(vec_t, ITER, ITER_REV);
+static void *vec_t_iter_get(iter_t *iter) { return iter->current; }
+
+DEFINE_PROTO(vec_t, ITER_FULL);

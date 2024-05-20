@@ -244,4 +244,9 @@ static void list_t_iter_next(iter_t *iter)
 		iter->next = ((lnode_t *)(iter->current))->next;
 }
 
+static void *list_t_iter_get(iter_t *iter)
+{
+	return ((lnode_t *)iter->current)->data;
+}
+
 DEFINE_PROTO(list_t, ITER);

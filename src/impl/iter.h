@@ -67,6 +67,14 @@ typedef struct {
  */
 #define ITER_VAL(iter, type) (*(type *)_##iter.current)
 
+#define for_iter_proto(proto, iter, itrable)                                   \
+	for (iter_t _##iter = proto->iter_new(itrable); _##iter.current;           \
+		 proto->iter_next(&_##iter))
+
+#define for_iter_rev_proto(proto, iter, itrable)                               \
+	for (iter_t _##iter = proto->iter_rev(itrable); _##iter.current;           \
+		 proto->iter_prev(&_##iter))
+
 /**
  * \brief Iterates over a `itrable` of type `itype` from the start.
  *
@@ -79,8 +87,7 @@ typedef struct {
  * documentation for `iter_t`.
  */
 #define for_iter(itype, iter, itrable)                                         \
-	for (iter_t _##iter = PROTOTYPE(itype)->iter_new(itrable);                 \
-		 _##iter.current; PROTOTYPE(itype)->iter_next(&_##iter))
+	for_iter_proto(PROTOTYPE(itype), iter, itrable)
 
 /**
  * \brief Iterates over a `itrable` of type `itype` from the end.
@@ -94,7 +101,6 @@ typedef struct {
  * the documentation for `iter_t`.
  */
 #define for_iter_rev(itype, iter, itrable)                                     \
-	for (iter_t _##iter = PROTOTYPE(itype)->iter_rev(itrable);                 \
-		 _##iter.current; PROTOTYPE(itype)->iter_prev(&_##iter))
+	for_iter_rev_proto(PROTOTYPE(itype), iter, itrable)
 
 #endif //!__ITER__H__

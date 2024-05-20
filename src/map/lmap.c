@@ -133,4 +133,9 @@ void lm_free(lmap_t *lmap)
 	dll_free(&lmap->data);
 }
 
-DEFINE_PROTO(lmap_t, ITER, ITER_REV);
+static void *lmap_t_iter_get(iter_t *iter)
+{
+	return ((dlnode_t *)iter->current)->data;
+}
+
+DEFINE_PROTO(lmap_t, ITER_FULL);

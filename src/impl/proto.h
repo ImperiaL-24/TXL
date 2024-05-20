@@ -21,10 +21,17 @@
 #define __TYPE_IMPL_CMP(type) .cmp = type##_cmp,
 
 #define __TYPE_IMPL_ITER(type)                                                 \
-	.iter_new = type##_iter_new, .iter_next = type##_iter_next,
+	.iter_new = type##_iter_new, .iter_next = type##_iter_next,                \
+	.iter_get = type##_iter_get,
 
 #define __TYPE_IMPL_ITER_REV(type)                                             \
-	.iter_rev = type##_iter_rev, .iter_prev = type##_iter_prev,
+	.iter_rev = type##_iter_rev, .iter_prev = type##_iter_prev,                \
+	.iter_get = type##_iter_get,
+
+#define __TYPE_IMPL_ITER_FULL(type)                                            \
+	.iter_new = type##_iter_new, .iter_next = type##_iter_next,                \
+	.iter_rev = type##_iter_rev, .iter_prev = type##_iter_prev,                \
+	.iter_get = type##_iter_get,
 
 #define __TYPE_IMPL_SET(type)                                                  \
 	.set_add = type##_set_add, .set_remove = type##_set_remove,                \
@@ -56,14 +63,16 @@ typedef struct {
 	void (*free)(void *);
 	void (*clone)(void *, void *);
 
-	iter_t (*iter_new)(void *itrble);
-	iter_t (*iter_rev)(void *itrble);
-	void (*iter_next)(iter_t *iter);
-	void (*iter_prev)(iter_t *iter);
+	iter_t (*iter_new)(void *);
+	iter_t (*iter_rev)(void *);
+	void (*iter_next)(iter_t *);
+	void (*iter_prev)(iter_t *);
 
-	iter_t (*set_add)(void *itrble);
-	iter_t (*set_remove)(void *itrble);
-	void (*set_has)(iter_t *iter);
+	void *(*iter_get)(iter_t *);
+
+	void (*set_add)(void *, void *);
+	void (*set_remove)(void *, void *);
+	size_t (*set_has)(void *, void *);
 
 } prototype_t;
 
