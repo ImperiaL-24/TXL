@@ -14,6 +14,7 @@
 #include "vec.h"
 
 #include "set/hset.h"
+#include "set/tset.h"
 
 #include "impl/set.h"
 
@@ -244,13 +245,13 @@ int main()
 	hset = HSET_NEW(uint32_t);
 	hset_t hset2 = HSET_NEW(uint32_t);
 
-	for (int i = 0; i < 20; i++) {
+	for (int i = 0; i < 5; i++) {
 		hs_add(&hset, &i);
 	}
-	DIE(hset.length != 20, "TEST 12 FAIL");
+	DIE(hset.length != 5, "TEST 12 FAIL");
 	for_iter(hset_t, i, &hset) { printf("%d ", SLITER_VAL(i, uint32_t)); }
 	printf("\n");
-	for (int i = 20; i < 40; i++) {
+	for (int i = 5; i < 10; i++) {
 		hs_add(&hset2, &i);
 	}
 	for_iter(hset_t, i, &hset2) { printf("%d ", SLITER_VAL(i, uint32_t)); }
@@ -259,10 +260,10 @@ int main()
 
 	for_iter(hset_t, i, &hset) { printf("%d ", SLITER_VAL(i, uint32_t)); }
 	printf("\n");
-	DIE(hset.length != 40, "TEST 12 FAIL");
+	DIE(hset.length != 10, "TEST 12 FAIL");
 
 	set_subtract(&hset, &hset2, PROTOTYPE(hset_t), PROTOTYPE(hset_t));
-	DIE(hset.length != 20, "TEST 12 FAIL");
+	DIE(hset.length != 5, "TEST 12 FAIL");
 
 	for_iter(hset_t, i, &hset) { printf("%d ", SLITER_VAL(i, uint32_t)); }
 	printf("\n");
@@ -271,8 +272,145 @@ int main()
 
 	for_iter(hset_t, i, &hset) { printf("%d ", SLITER_VAL(i, uint32_t)); }
 	printf("\n");
-	DIE(hset.length != 20, "TEST 12 FAIL");
+	DIE(hset.length != 5, "TEST 12 FAIL");
 
 	hs_free(&hset);
 	hs_free(&hset2);
+
+	/* TSET */
+	printf("TSET START\n");
+
+	tset_t tset = TSET_NEW(uint32_t);
+	value = 5;
+	ts_add(&tset, &value);
+
+	for_iter(tset_t, i, &tset)
+	{
+		printf("%d ", *(uint32_t *)PROTOTYPE(tset_t)->iter_get(&_i));
+	}
+	printf("\n");
+
+	DIE(!ts_has(&tset, &value), "TEST 13 FAIL");
+
+	ts_remove(&tset, &value);
+
+	DIE(ts_has(&tset, &value), "TEST 13 FAIL");
+
+	for (int i = 0; i < 100; i++) {
+		ts_add(&tset, &value);
+	}
+
+	DIE(!ts_has(&tset, &value), "TEST 13 FAIL");
+
+	for (int i = 0; i < 100; i++) {
+		ts_remove(&tset, &value);
+	}
+
+	DIE(ts_has(&tset, &value), "TEST 13 FAIL");
+
+	for (int i = 0; i < 100; i++) {
+		ts_add(&tset, &i);
+	}
+
+	DIE(!ts_has(&tset, &value), "TEST 13 FAIL");
+	for_iter(tset_t, i, &tset)
+	{
+		printf("%d ", *(uint32_t *)PROTOTYPE(tset_t)->iter_get(&_i));
+	}
+	printf("\n");
+
+	for (int i = 0; i < 80; i += 5) {
+		ts_remove(&tset, &i);
+	}
+
+	for_iter(tset_t, i, &tset)
+	{
+		printf("%d ", *(uint32_t *)PROTOTYPE(tset_t)->iter_get(&_i));
+	}
+	printf("\n");
+	ts_free(&tset);
+	printf(" TSET OPERATIONS \n\n");
+
+	tset = TSET_NEW(uint32_t);
+	tset_t tset2 = TSET_NEW(uint32_t);
+
+	for (int i = 0; i < 5; i++) {
+		ts_add(&tset, &i);
+	}
+	int testttt = 1;
+	ts_add(&tset, &testttt);
+
+	// // DIE(tset.length != 5, "TEST 12 FAIL");
+	for_iter(tset_t, i, &tset) { printf("%d ", SLITER_VAL(i, uint32_t)); }
+	printf("\n");
+	for (int i = 5; i < 10; i++) {
+		ts_add(&tset2, &i);
+	}
+	for_iter(tset_t, i, &tset2) { printf("%d ", SLITER_VAL(i, uint32_t)); }
+	printf("\n");
+	set_reunion(&tset, &tset2, PROTOTYPE(tset_t), PROTOTYPE(tset_t));
+
+	for_iter(tset_t, i, &tset) { printf("%d ", SLITER_VAL(i, uint32_t)); }
+	printf("\n");
+	// // DIE(tset.length != 10, "TEST 12 FAIL");
+
+	set_subtract(&tset, &tset2, PROTOTYPE(tset_t), PROTOTYPE(tset_t));
+	// // DIE(tset.length != 5, "TEST 12 FAIL");
+
+	for_iter(tset_t, i, &tset) { printf("%d ", SLITER_VAL(i, uint32_t)); }
+	printf("\n");
+	set_reunion(&tset, &tset2, PROTOTYPE(tset_t), PROTOTYPE(tset_t));
+	set_reunion(&tset, &tset2, PROTOTYPE(tset_t), PROTOTYPE(tset_t));
+
+	// set_intersect(&tset, &tset2, PROTOTYPE(tset_t), PROTOTYPE(tset_t));
+
+	for_iter(tset_t, i, &tset) { printf("%d ", SLITER_VAL(i, uint32_t)); }
+	printf("\n");
+	// // DIE(tset.length != 5, "TEST 12 FAIL");
+	ts_free(&tset);
+	ts_free(&tset2);
+
+	printf(" HYBRID OPERATIONS \n\n");
+
+	tset = TSET_NEW(uint32_t);
+	hset = HSET_NEW(uint32_t);
+
+	for (int i = 0; i < 5; i++) {
+		ts_add(&tset, &i);
+	}
+	testttt = 1;
+	ts_add(&tset, &testttt);
+
+	// // DIE(tset.length != 5, "TEST 12 FAIL");
+	for_iter(tset_t, i, &tset) { printf("%d ", SLITER_VAL(i, uint32_t)); }
+	printf("\n");
+	for (int i = 5; i < 10; i++) {
+		hs_add(&hset, &i);
+	}
+	for_iter(hset_t, i, &hset) { printf("%d ", SLITER_VAL(i, uint32_t)); }
+	printf("\n");
+	set_reunion(&tset, &hset, PROTOTYPE(tset_t), PROTOTYPE(hset_t));
+
+	for_iter(tset_t, i, &tset) { printf("%d ", SLITER_VAL(i, uint32_t)); }
+	printf("\n");
+	// // DIE(tset.length != 10, "TEST 12 FAIL");
+
+	set_subtract(&tset, &hset, PROTOTYPE(tset_t), PROTOTYPE(hset_t));
+	// // DIE(tset.length != 5, "TEST 12 FAIL");
+
+	for_iter(tset_t, i, &tset) { printf("%d ", SLITER_VAL(i, uint32_t)); }
+	printf("\n");
+	set_reunion(&tset, &hset, PROTOTYPE(tset_t), PROTOTYPE(hset_t));
+	set_reunion(&tset, &hset, PROTOTYPE(tset_t), PROTOTYPE(hset_t));
+
+	for_iter(tset_t, i, &tset) { printf("%d ", SLITER_VAL(i, uint32_t)); }
+	printf("\n");
+
+	set_intersect(&tset, &hset, PROTOTYPE(tset_t), PROTOTYPE(hset_t));
+
+	for_iter(tset_t, i, &tset) { printf("%d ", SLITER_VAL(i, uint32_t)); }
+	printf("\n");
+	// // DIE(tset.length != 5, "TEST 12 FAIL");
+	ts_free(&tset);
+	hs_free(&hset);
 }

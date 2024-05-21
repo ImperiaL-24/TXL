@@ -15,7 +15,7 @@
  *
  */
 #define impl_default_clone(type)                                               \
-	void type##_clone(void *target, void *origin)                              \
+	static inline void type##_clone(void *target, void *origin)                \
 	{                                                                          \
 		*(type *)target = *(type *)origin;                                     \
 	}

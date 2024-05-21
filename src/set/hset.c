@@ -132,6 +132,18 @@ void hs_free(hset_t *hset)
 #define hset_t_set_remove hs_remove
 #define hset_t_set_has hs_has
 
+static inline lnode_t *__next_node(hset_t *hset, lnode_t *node, size_t *i)
+{
+	lnode_t *next = node->next;
+	while (!next) {
+		(*i)++;
+		if (*i >= hset->capacity)
+			break;
+		next = hset->lists[*i].head;
+	}
+	return next;
+}
+
 /**
  * \brief Creates an iterator from a Singly Linked List.
  *
@@ -149,22 +161,8 @@ static inline iter_t hset_t_iter_new(void *hset)
 		if (!elem)
 			continue;
 		first = elem;
-		// printf("FIRST FOUND: %d\n", *(uint32_t *)elem->data);
-		next = elem->next;
-		// printf("NEXT REF: %p\n", next);
 
-		while (!next) {
-			// printf("NO NEXT, NEXT BUCKET\n");
-
-			i++;
-			if (i >= ((hset_t *)hset)->capacity) {
-				// printf("NO CAPACITY\n");
-				break;
-			}
-
-			next = ((hset_t *)hset)->lists[i].head;
-			// printf("NEXT REF: %p\n", next);
-		}
+		next = __next_node(hset, elem, &i);
 		break;
 	}
 
@@ -184,24 +182,7 @@ static void hset_t_iter_next(iter_t *iter)
 	if (!iter->current)
 		return;
 
-	lnode_t *next = ((lnode_t *)iter->current)->next;
-	// printf("NEXT REF: %p\n", next);
-
-	while (!next) {
-		// printf("NO NEXT, NEXT BUCKET\n");
-
-		iter->metadata++;
-		// printf("NEW BUCKET: %d\n", iter->metadata);
-
-		if (iter->metadata >= ((hset_t *)iter->iterable)->capacity) {
-			// printf("NO CAPACITY %d\n", ((hset_t *)iter->iterable)->capacity);
-			break;
-		}
-
-		next = ((hset_t *)iter->iterable)->lists[iter->metadata].head;
-		// printf("NEXT REF: %p\n", next);
-	}
-	iter->next = next;
+	iter->next = __next_node(iter->iterable, iter->current, &iter->metadata);
 }
 
 static void *hset_t_iter_get(iter_t *iter)

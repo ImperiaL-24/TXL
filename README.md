@@ -6,15 +6,19 @@
 This is an extension/wrapper of the C Standard Library featuring Lists, Maps, Iterators, Strings, A prototype system with Traits, and so on.
 
 #### TODO:
-- ? Add A Tree
-- T/C Treap
-- T TreeSet 
-- T HashSet
+ - Graph
+- ITER_VAL generic
+- kv pair redo
+
+
 
 - TreeSet can be used for storing friends of a user. Iter and IterRev can be implemented for a TreeSet
-	- If is Right Leaf, go to Parent.
-	- If has Left SubTree, go to Successor.
-	- If no Left SubTree, go to Grandfather (If Grandfather is the root, and I am a leftist Child kill iteration).
+	- Start from Left most Leaf
+	- Iterate through the next elements. Get the next element with the following rules:
+		- If has Right SubTree, go to Successor.
+		- If no Right SubTree & is Left Child, go to Parent.
+		- If no Right SubTree & is Right Child, go to First Left Ancestor 
+	- Iteration will be stopped when First Left Ancestor is NULL (at step 3 of iteration)
 
 Operation|HashSet         |   TreeSet|
 | ---- | ----- |----- |

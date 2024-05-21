@@ -7,7 +7,29 @@
  */
 #include "str.h"
 #include "err.h"
+#include "impl/char_impl.h"
+#include "vec.h"
+#include <ctype.h>
 #include <stdlib.h>
+str_t str_read(FILE *file)
+{
+	vec_t vec = vec_new(PROTOTYPE(char));
+	char read_char = fgetc(file);
+	while (!isprint(read_char)) {
+		read_char = fgetc(file);
+	}
+
+	while (isprint(read_char)) {
+		vec_push(&vec, &read_char);
+		read_char = fgetc(file);
+	}
+	read_char = 0;
+	vec_push(&vec, &read_char);
+	str_t ret = str_clone(vec.data);
+	vec_free(&vec);
+
+	return ret;
+}
 
 str_t str_ref(str_t str)
 {
@@ -24,6 +46,24 @@ str_t str_clone(str_t str)
 	DIE(!string, "Malloc Fail");
 	memcpy(string, str, len + 1);
 	return string;
+}
+
+size_t str_is_int(str_t string)
+{
+	/* If it is empty or it does not exist */
+	if (!string || string[0] == '\0')
+		return 0;
+	/* If the first character is not a `-` or a digit */
+	if (!isdigit(string[0]) && string[0] != '-')
+		return 0;
+	/* All other characters must be a digit */
+	size_t pos = 1;
+	while (string[pos] != '\0') {
+		if (!isdigit(string[pos]))
+			return 0;
+		pos++;
+	}
+	return 1;
 }
 
 hash_t str_t_hash(void *key)

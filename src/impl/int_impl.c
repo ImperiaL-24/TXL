@@ -6,6 +6,7 @@
  * \brief Integer Default Implementations
  */
 #include "int_impl.h"
+#include "clone.h"
 #include "cmp.h"
 #include "hash.h"
 #include <stddef.h>
@@ -33,9 +34,6 @@ static cmp_t uint32_t_cmp(void *num1, void *num2)
 }
 
 /* uint32_t Clone implementation */
-static inline void uint32_t_clone(void *target, void *origin)
-{
-	*(uint32_t *)target = *(uint32_t *)origin;
-}
+impl_default_clone(uint32_t);
 
 DEFINE_PROTO(uint32_t, CLONE, HASH, CMP, FREE_DEFAULT);

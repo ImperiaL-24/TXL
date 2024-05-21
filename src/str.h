@@ -11,10 +11,19 @@
 #include "impl/cmp.h"
 #include "impl/hash.h"
 #include "impl/proto.h"
+#include <stdio.h>
 #include <string.h>
 #define MAX_FMT_LENGTH 4096
 /* A C String. Implements Hash, Compare, Clone and Free */
 typedef char *str_t;
+
+/**
+ * \brief Reads a string from the passed file.
+ *
+ * \param[in] file The file to read from.
+ * \return The read string.
+ */
+str_t str_read(FILE *file);
 
 /**
  * \brief Creates a `str_t` reference to a C String. Should be used when the C
@@ -32,6 +41,15 @@ str_t str_ref(str_t str);
  * \return A different instance of the same string.
  */
 str_t str_clone(str_t str);
+
+/**
+ * \brief Determines if a string represents a base 10 integer.
+ *
+ * \param[in] string The string to verify
+ *
+ * \return `1` if `string` represents an integer. `0` otherwise.
+ */
+size_t str_is_int(str_t string);
 
 /**
  * \brief Frees a string from memory.
