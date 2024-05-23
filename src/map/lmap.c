@@ -127,7 +127,7 @@ void lm_free(lmap_t *lmap)
 	hm_free(&lmap->access);
 	for_iter(dlist_t, i, &lmap->data)
 	{
-		kv_pair_data_free(DLITER_VAL(i, kv_pair_t), lmap->access.key_proto,
+		kv_pair_data_free(ITER_VAL(i, kv_pair_t), lmap->access.key_proto,
 						  lmap->value_proto);
 	}
 	dll_free(&lmap->data);

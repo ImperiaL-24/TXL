@@ -6,8 +6,6 @@
 This is an extension/wrapper of the C Standard Library featuring Lists, Maps, Iterators, Strings, A prototype system with Traits, and so on.
 
 #### TODO:
- - Graph
-- ITER_VAL generic
 - kv pair redo
 
 

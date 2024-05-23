@@ -96,6 +96,7 @@
     "text_encoding": "c",
     "random": "c",
     "sstream": "c",
-    "source_location": "c"
+    "source_location": "c",
+    "cstdlib": "c"
   }
 }

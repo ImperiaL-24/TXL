@@ -96,8 +96,10 @@ static lnode_t *sll_jump(list_t *list, size_t index)
 	size_t iter_index = 0;
 	for_iter(list_t, i, list)
 	{
-		if (iter_index == index || !ITER_VAL(i, lnode_t).next)
-			return &ITER_VAL(i, lnode_t);
+		/* Since we do not have non generic iterators, we need this iter
+		 * tomfoolery */
+		if (iter_index == index || !((lnode_t *)_i.iter.current)->next)
+			return _i.iter.current;
 
 		iter_index++;
 	}

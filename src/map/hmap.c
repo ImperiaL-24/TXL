@@ -44,9 +44,9 @@ static int __hm_resize(hmap_t *hmap)
 	for (size_t idx = 0; idx < hmap->capacity; idx++) {
 		for_iter(list_t, i, hmap->lists + idx)
 		{
-			hash_t hash = hmap->key_proto->hash(SLITER_VAL(i, kv_pair_t).key);
+			hash_t hash = hmap->key_proto->hash(ITER_VAL(i, kv_pair_t).key);
 			size_t id = hash % next_size;
-			sll_addt(&new_lists[id], &SLITER_VAL(i, kv_pair_t));
+			sll_addt(&new_lists[id], &ITER_VAL(i, kv_pair_t));
 		}
 		sll_free(hmap->lists + idx);
 	}
@@ -90,10 +90,10 @@ void hm_set(hmap_t *hmap, void *key, void *value)
 		kv_pair_new(key, value, hmap->key_proto, hmap->value_proto);
 	for_iter(list_t, i, hmap->lists + idx)
 	{
-		if (hmap->key_proto->cmp(SLITER_VAL(i, kv_pair_t).key, key) == 0) {
-			kv_pair_deep_free(SLITER_VAL(i, kv_pair_t), hmap->key_proto,
+		if (hmap->key_proto->cmp(ITER_VAL(i, kv_pair_t).key, key) == 0) {
+			kv_pair_deep_free(ITER_VAL(i, kv_pair_t), hmap->key_proto,
 							  hmap->value_proto);
-			memcpy(&SLITER_VAL(i, kv_pair_t), &pair, sizeof(kv_pair_t));
+			memcpy(&ITER_VAL(i, kv_pair_t), &pair, sizeof(kv_pair_t));
 			return;
 		}
 	}
@@ -111,16 +111,16 @@ void hm_remove(hmap_t *hmap, void *key)
 	lnode_t *prev = NULL;
 	for_iter(list_t, i, hmap->lists + idx)
 	{
-		if (hmap->key_proto->cmp(SLITER_VAL(i, kv_pair_t).key, key) == 0) {
+		if (hmap->key_proto->cmp(ITER_VAL(i, kv_pair_t).key, key) == 0) {
 			lnode_t *prev_ref = prev ? prev : NULL;
-			kv_pair_data_free(SLITER_VAL(i, kv_pair_t), hmap->key_proto,
+			kv_pair_data_free(ITER_VAL(i, kv_pair_t), hmap->key_proto,
 							  hmap->value_proto);
 			sll_rem_after(hmap->lists + idx, prev_ref);
 			hmap->length--;
 			__hm_resize(hmap);
 			return;
 		}
-		prev = &ITER_VAL(i, lnode_t);
+		prev = _i.iter.current;
 	}
 }
 
@@ -130,8 +130,8 @@ void *hm_get(hmap_t *hmap, void *key)
 	size_t idx = hash % hmap->capacity;
 	for_iter(list_t, i, hmap->lists + idx)
 	{
-		if (hmap->key_proto->cmp(SLITER_VAL(i, kv_pair_t).key, key) == 0) {
-			return SLITER_VAL(i, kv_pair_t).value;
+		if (hmap->key_proto->cmp(ITER_VAL(i, kv_pair_t).key, key) == 0) {
+			return ITER_VAL(i, kv_pair_t).value;
 		}
 	}
 	return NULL;
@@ -143,7 +143,7 @@ size_t hm_has(hmap_t *hmap, void *key)
 	size_t idx = hash % hmap->capacity;
 	for_iter(list_t, i, hmap->lists + idx)
 	{
-		if (hmap->key_proto->cmp(SLITER_VAL(i, kv_pair_t).key, key) == 0) {
+		if (hmap->key_proto->cmp(ITER_VAL(i, kv_pair_t).key, key) == 0) {
 			return 1;
 		}
 	}
@@ -155,7 +155,7 @@ void hm_free(hmap_t *hmap)
 	for (size_t idx = 0; idx < hmap->capacity; idx++) {
 		for_iter(list_t, i, hmap->lists + idx)
 		{
-			kv_pair_data_free(SLITER_VAL(i, kv_pair_t), hmap->key_proto,
+			kv_pair_data_free(ITER_VAL(i, kv_pair_t), hmap->key_proto,
 							  hmap->value_proto);
 		}
 		sll_free(hmap->lists + idx);

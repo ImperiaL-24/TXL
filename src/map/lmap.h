@@ -102,31 +102,5 @@ size_t lm_has(lmap_t *lmap, void *key);
  */
 void lm_free(lmap_t *lmap);
 
-/**
- * \brief Gets the current value at which `iter` is at, as a `type`, if the
- * iterable is a Linked HashMap. Since an iterator over a `lmap_t` iterates
- * over nodes, using the normal methods would get the node at which is at and
- * not the value itself.
- *
- * \param[in] iter [iter_t] The iterator to get the value from
- * \param[in] type <type> The type of the stored value
- *
- * \return [type] The current value of the iterator.
- */
-#define LMITER_VAL(iter, type) (*(type *)DLITER_VAL(iter, kv_pair_t).value)
-
-/**
- * \brief Gets the current key at which `iter` is at, as a `type`, if the
- * iterable is a Linked HashMap. Since an iterator over a `lmap_t` iterates
- * over nodes, using the normal methods would get the node at which is at and
- * not the key itself.
- *
- * \param[in] iter [iter_t] The iterator to get the key from
- * \param[in] type <type> The type of the stored key
- *
- * \return [type] The current key of the iterator.
- */
-#define LMITER_KEY(iter, type) (*(type *)DLITER_VAL(iter, kv_pair_t).key)
-
 DECLARE_PROTO(lmap_t);
 #endif // !__LMAP__H__

@@ -88,8 +88,9 @@ static dlnode_t *dll_jump(dlist_t *list, size_t index)
 		size_t iter_index = list->size - 1;
 		for_iter_rev(dlist_t, i, list)
 		{
-			if (iter_index == index || !ITER_VAL(i, dlnode_t).prev)
-				return &ITER_VAL(i, dlnode_t);
+
+			if (iter_index == index || !((dlnode_t *)_i.iter.current)->prev)
+				return _i.iter.current;
 
 			iter_index--;
 		}
@@ -97,8 +98,8 @@ static dlnode_t *dll_jump(dlist_t *list, size_t index)
 		size_t iter_index = 0;
 		for_iter(dlist_t, i, list)
 		{
-			if (iter_index == index || !ITER_VAL(i, dlnode_t).next)
-				return &ITER_VAL(i, dlnode_t);
+			if (iter_index == index || !((dlnode_t *)_i.iter.current)->next)
+				return _i.iter.current;
 
 			iter_index++;
 		}
@@ -194,9 +195,9 @@ void dll_free(dlist_t *list)
 		return;
 	for_iter(dlist_t, i, list)
 	{
-		if (&ITER_VAL(i, dlnode_t) == list->head)
+		if (_i.iter.current == list->head)
 			continue;
-		dlnode_free(ITER_VAL(i, dlnode_t).prev, list->data_proto);
+		dlnode_free(((dlnode_t *)_i.iter.current)->prev, list->data_proto);
 		// dlnode_free(&ITER_VAL(i, dlnode_t), list->data_proto);
 	}
 	dlnode_free(list->tail, list->data_proto);

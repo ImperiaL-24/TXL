@@ -1,0 +1,41 @@
+src/main.c: In function ‘main’:
+src/main.c:289:72: error: passing argument 1 of ‘__tset_t_proto()->iter_get’ from incompatible pointer type [-Wincompatible-pointer-types]
+  289 |                 printf("%d ", *(uint32_t *)PROTOTYPE(tset_t)->iter_get(&_i));
+      |                                                                        ^~~
+      |                                                                        |
+      |                                                                        iter_wrapper_t *
+src/main.c:289:72: note: expected ‘iter_t *’ but argument is of type ‘iter_wrapper_t *’
+src/main.c:318:72: error: passing argument 1 of ‘__tset_t_proto()->iter_get’ from incompatible pointer type [-Wincompatible-pointer-types]
+  318 |                 printf("%d ", *(uint32_t *)PROTOTYPE(tset_t)->iter_get(&_i));
+      |                                                                        ^~~
+      |                                                                        |
+      |                                                                        iter_wrapper_t *
+src/main.c:318:72: note: expected ‘iter_t *’ but argument is of type ‘iter_wrapper_t *’
+src/main.c:328:72: error: passing argument 1 of ‘__tset_t_proto()->iter_get’ from incompatible pointer type [-Wincompatible-pointer-types]
+  328 |                 printf("%d ", *(uint32_t *)PROTOTYPE(tset_t)->iter_get(&_i));
+      |                                                                        ^~~
+      |                                                                        |
+      |                                                                        iter_wrapper_t *
+src/main.c:328:72: note: expected ‘iter_t *’ but argument is of type ‘iter_wrapper_t *’
+src/impl/set.c: In function ‘set_reunion’:
+src/impl/set.c:17:69: error: passing argument 1 of ‘other_proto->iter_get’ from incompatible pointer type [-Wincompatible-pointer-types]
+   17 |                 origin_proto->set_add(origin, other_proto->iter_get(&_i));
+      |                                                                     ^~~
+      |                                                                     |
+      |                                                                     iter_wrapper_t *
+src/impl/set.c:17:69: note: expected ‘iter_t *’ but argument is of type ‘iter_wrapper_t *’
+src/impl/set.c: In function ‘set_intersect’:
+src/impl/set.c:31:58: error: passing argument 1 of ‘origin_proto->iter_get’ from incompatible pointer type [-Wincompatible-pointer-types]
+   31 |                 ref_t value_ref = origin_proto->iter_get(&_i);
+      |                                                          ^~~
+      |                                                          |
+      |                                                          iter_wrapper_t *
+src/impl/set.c:31:58: note: expected ‘iter_t *’ but argument is of type ‘iter_wrapper_t *’
+src/impl/set.c: In function ‘set_subtract’:
+src/impl/set.c:50:72: error: passing argument 1 of ‘other_proto->iter_get’ from incompatible pointer type [-Wincompatible-pointer-types]
+   50 |                 origin_proto->set_remove(origin, other_proto->iter_get(&_i));
+      |                                                                        ^~~
+      |                                                                        |
+      |                                                                        iter_wrapper_t *
+src/impl/set.c:50:72: note: expected ‘iter_t *’ but argument is of type ‘iter_wrapper_t *’
+make: *** [Makefile:15: build] Error 1

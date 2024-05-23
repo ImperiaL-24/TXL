@@ -14,7 +14,7 @@ void set_reunion(void *origin, void *other, const prototype_t *origin_proto,
 {
 	for_iter_proto(other_proto, i, other)
 	{
-		origin_proto->set_add(origin, other_proto->iter_get(&_i));
+		origin_proto->set_add(origin, ITER_GET(i));
 	}
 }
 
@@ -28,7 +28,7 @@ void set_intersect(void *origin, void *other, const prototype_t *origin_proto,
 	/* vectorize the set */
 	for_iter_proto(origin_proto, i, origin)
 	{
-		ref_t value_ref = origin_proto->iter_get(&_i);
+		ref_t value_ref = ITER_GET(i);
 		vec_push(&vec, &value_ref);
 	}
 
@@ -47,6 +47,6 @@ void set_subtract(void *origin, void *other, const prototype_t *origin_proto,
 {
 	for_iter_proto(other_proto, i, other)
 	{
-		origin_proto->set_remove(origin, other_proto->iter_get(&_i));
+		origin_proto->set_remove(origin, ITER_GET(i));
 	}
 }

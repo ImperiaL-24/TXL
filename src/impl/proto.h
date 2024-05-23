@@ -10,7 +10,7 @@
 
 #include "cmp.h"
 #include "hash.h"
-#include "iter.h"
+#include "iter_type.h"
 #include "stdlib.h"
 /* How to implement the traits in a prototype */
 

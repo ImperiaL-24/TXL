@@ -149,19 +149,6 @@ void dll_free(dlist_t *list);
  */
 #define DLIST_GET(list, type, index) (*(type *)dll_get(list, index))
 
-/**
- * \brief Gets the current data at which `iter` is at, as a `type`, if the
- * iterable is a Doubly Linked List. Since an iterator over a `dlist_t` iterates
- * over nodes, using the normal methods would get the node at which is at and
- * not the value itself.
- *
- * \param[in] iter [iter_t] The iterator to get the value from
- * \param[in] type <type> The type of the stored value
- *
- * \return [type] The current value of the iterator.
- */
-#define DLITER_VAL(iter, type) (*(type *)(ITER_VAL(iter, dlnode_t).data))
-
 DECLARE_PROTO(dlist_t);
 
 #endif // !__DLIST__H__

@@ -35,9 +35,9 @@ static int __hs_resize(hset_t *hset)
 	for (size_t idx = 0; idx < hset->capacity; idx++) {
 		for_iter(list_t, i, hset->lists + idx)
 		{
-			hash_t hash = hset->data_proto->hash(ITER_VAL(i, lnode_t).data);
+			hash_t hash = hset->data_proto->hash(ITER_GET(i));
 			size_t id = hash % next_size;
-			sll_addt(&new_lists[id], ITER_VAL(i, lnode_t).data);
+			sll_addt(&new_lists[id], ITER_GET(i));
 		}
 		sll_free(hset->lists + idx);
 	}
@@ -75,7 +75,7 @@ void hs_add(void *hset, void *data)
 	size_t idx = hash % hset_cast->capacity;
 	for_iter(list_t, i, hset_cast->lists + idx)
 	{
-		if (hset_cast->data_proto->cmp(ITER_VAL(i, lnode_t).data, data) == 0)
+		if (hset_cast->data_proto->cmp(ITER_GET(i), data) == 0)
 			return;
 	}
 	hset_cast->length++;
@@ -94,7 +94,7 @@ void hs_remove(void *hset, void *data)
 	lnode_t *prev = NULL;
 	for_iter(list_t, i, hset_cast->lists + idx)
 	{
-		if (hset_cast->data_proto->cmp(ITER_VAL(i, lnode_t).data, data) == 0) {
+		if (hset_cast->data_proto->cmp(ITER_GET(i), data) == 0) {
 			lnode_t *prev_ref = prev ? prev : NULL;
 			// hset_cast->data_proto->free(ITER_VAL(i, lnode_t).data);
 			sll_rem_after(hset_cast->lists + idx, prev_ref);
@@ -102,7 +102,7 @@ void hs_remove(void *hset, void *data)
 			__hs_resize(hset_cast);
 			return;
 		}
-		prev = &ITER_VAL(i, lnode_t);
+		prev = _i.iter.current;
 	}
 }
 
@@ -113,7 +113,7 @@ size_t hs_has(void *hset, void *data)
 	size_t idx = hash % hset_cast->capacity;
 	for_iter(list_t, i, hset_cast->lists + idx)
 	{
-		if (hset_cast->data_proto->cmp(ITER_VAL(i, lnode_t).data, data) == 0) {
+		if (hset_cast->data_proto->cmp(ITER_GET(i), data) == 0) {
 			return 1;
 		}
 	}

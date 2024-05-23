@@ -145,19 +145,6 @@ void sll_free(list_t *list);
  */
 #define LIST_GET(list, type, index) (*(type *)sll_get(list, index))
 
-/**
- * \brief Gets the current data at which `iter` is at, as a `type`, if the
- * iterable is a Singly Linked List. Since an iterator over a `list_t` iterates
- * over nodes, using the normal methods would get the node at which is at and
- * not the value itself.
- *
- * \param[in] iter [iter_t] The iterator to get the value from
- * \param[in] type <type> The type of the stored value
- *
- * \return [type] The current value of the iterator.
- */
-#define SLITER_VAL(iter, type) (*(type *)(ITER_VAL(iter, lnode_t).data))
-
 DECLARE_PROTO(list_t);
 
 #endif // !__LIST__H__
