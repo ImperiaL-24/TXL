@@ -5,7 +5,7 @@
  * \brief Resizable Vector Implementation
  */
 #include "vec.h"
-#include "err.h"
+#include "../err.h"
 #include <string.h>
 
 /**

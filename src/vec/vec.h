@@ -6,9 +6,9 @@
  */
 #ifndef __VEC__H__
 #define __VEC__H__
+#include "../impl/iter.h"
+#include "../impl/proto.h"
 #include "err.h"
-#include "impl/iter.h"
-#include "impl/proto.h"
 #include <stdlib.h>
 
 /**
